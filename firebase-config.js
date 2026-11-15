@@ -1,16 +1,15 @@
-// 1) Pega aquí la configuración de tu app web de Firebase
-//    (Consola de Firebase > Configuración del proyecto > Tus apps > SDK setup and configuration > Config)
+// Configuración de la app web de Firebase (proyecto inventarios-villao)
 export const firebaseConfig = {
-  apiKey: "PEGA_AQUI_TU_API_KEY",
-  authDomain: "TU_PROYECTO.firebaseapp.com",
-  projectId: "TU_PROYECTO",
-  storageBucket: "TU_PROYECTO.appspot.com",
-  messagingSenderId: "000000000000",
-  appId: "1:000000000000:web:xxxxxxxxxxxx"
+  apiKey: "AIzaSyCVVs00Q068pD7vm4B_H2puAng351o1jFo",
+  authDomain: "inventarios-villao.firebaseapp.com",
+  projectId: "inventarios-villao",
+  storageBucket: "inventarios-villao.firebasestorage.app",
+  messagingSenderId: "297836888259",
+  appId: "1:297836888259:web:53683a83a16ad8106f6276"
 };
 
-// 2) Correos de Google que pueden cargar y publicar datos.
-//    Deben ser los mismos que pongas en las reglas de Firestore (firestore.rules).
+// Correos (usuarios creados en Firebase Authentication) que pueden publicar datos.
+// Deben ser los mismos que están en las reglas de Firestore.
 export const EDITORES = [
-  "tu-correo@gmail.com"
+  "cpedrazapa@gmail.com"
 ];
