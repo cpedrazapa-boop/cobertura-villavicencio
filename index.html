@@ -217,20 +217,21 @@ try{const h=location.hash.slice(1);if(['d1','d3','canal','data'].includes(h))VIE
 const N=v=>+v||0, dv=(a,b)=>b?a/b:0;
 const f0=new Intl.NumberFormat('es-CO',{maximumFractionDigits:0}),f1=new Intl.NumberFormat('es-CO',{minimumFractionDigits:1,maximumFractionDigits:1});
 const fmt={n0:v=>f0.format(v),n1:v=>f1.format(v),pct:v=>f0.format(v*100)+' %',t:v=>v??''};
-const semDC=v=>v<5?'c-r':v<7?'c-y':'c-g';            // días de cobertura
-const semDC3=v=>v<1?'c-r':v<2?'c-y':'c-g';         // cobertura en bloques de 3 días
-const semPct=v=>v<0.25?'c-r':v<0.5?'c-y':'c-g';       // participación por canal
+// Reglas de color iguales a las del reporte de Power BI
+const semDC=v=>v>=4&&v<=6?'c-y':v>6&&v<800?'c-g':v>=-500&&v<4?'c-r':'';    // TOTAL D+1
+const semDC3=v=>v>=2&&v<=4?'c-y':v>4&&v<800?'c-g':v>=-500&&v<2?'c-r':'';   // TOTAL DC D+3
+const semPct=v=>v>=0&&v<0.2?'c-r':v>=0.2&&v<0.4?'c-y':v>=0.4&&v<=1?'c-g':''; // %_KA, %_TAT, %_SOCIOS
 const semCump=v=>v<0.8?'c-r':v<0.95?'c-y':'c-g';      // cumplimiento CD vs FC
 function diasProd(r){const f=r['Fecha Prox Prod'];if(!f)return 0;const d=new Date(String(f).slice(0,10)+'T00:00:00');if(isNaN(d))return 0;const t=new Date();t.setHours(0,0,0,0);return Math.round((d-t)/864e5)}
 const VIEWS={
   d1:{title:'DÍAS COBERTURA TRÁNSITOS (D+1)',filter:r=>N(r['FC Dia'])>0,sort:['Material',1],
-    note:'TOTAL = DC Bodega + DC Tránsitos − DC Preventa (Venta W+1 ÷ FC Día). Verde ≥ 7 días, amarillo 5–7, rojo < 5.',
+    note:'TOTAL = DC Bodega + DC Tránsitos − DC Preventa (Venta W+1 ÷ FC Día). Verde > 6 días, amarillo 4–6, rojo < 4.',
     cols:[['Material','MATERIAL','t'],['Descripcion','Descripción','t'],['dcB','DC BODEGA','n1'],['dcT','DC TRÁNSITOS','n1'],['dcP1','DC PREVENTA','n1'],['tot1','TOTAL','n1',semDC],['FC Dia','FC DÍA','n0'],['DC TMS','DC TMS','n0'],['PRD 1,5 PQ','PRD 1,5 PQ','n0']]},
   d3:{title:'DÍAS COBERTURA D+3',filter:r=>N(r['FC Dia'])>0||N(r['VENTA D+3'])>0,sort:['tot3',1],
-    note:'Días calculados sobre FC Día x3. TOTAL DC = DC Bodega + DC Tránsitos − DC Preventa D+3 (Venta D+3 ÷ FC Día x3). Rojo < 1, amarillo 1–2, verde ≥ 2. Ordenado de menor a mayor.',
+    note:'Días calculados sobre FC Día x3. TOTAL DC = DC Bodega + DC Tránsitos − DC Preventa D+3 (Venta D+3 ÷ FC Día x3). Verde > 4, amarillo 2–4, rojo < 2. Ordenado de menor a mayor.',
     cols:[['Material','MATERIAL','t'],['Descripcion','Descripción','t'],['dcB3','DC BODEGA','n1'],['dcT3','DC TRÁNSITOS','n1'],['dcP3','DC PREVENTA','n1'],['tot3','TOTAL DC','n1',semDC3],['fc3','FC Día x3','n0'],['dProd','DÍAS PROD','n0'],['planta','PLANTA','t']]},
   canal:{title:'VOLUMEN ENTREGADO X CANAL',filter:r=>N(r['FC TOTAL CD'])>0||N(r['Volumen Entregado'])>0,sort:['FC TOTAL CD',-1],
-    note:'% por canal = entregado del canal ÷ Entregado CD. CD vs FC = Entregado CD ÷ FC MTD (verde ≥ 95 %, amarillo 80–95 %, rojo < 80 %). FC Mes − Entregado = FC Total CD − Entregado CD.',
+    note:'% por canal = entregado del canal ÷ Entregado CD (rojo < 20 %, amarillo 20–40 %, verde ≥ 40 %). CD vs FC = Entregado CD ÷ FC MTD (verde ≥ 95 %, amarillo 80–95 %, rojo < 80 %). FC Mes − Entregado = FC Total CD − Entregado CD.',
     cols:[['Material','Material','t'],['Descripcion','Descripción','t'],['FC TOTAL CD','FC TOTAL CD','n0'],['FC MES','FC MTD','n0'],['Entregado KA','Entregado KA','n0'],['Entregado TAT','Entregado TAT','n0'],['Entregado Socios','Entregado Socios','n0'],['Volumen Entregado','Entregado CD','n0'],['pKA','%_KA','pct',semPct],['pTAT','%_TAT','pct',semPct],['pSoc','%_SOCIOS','pct',semPct],['cdfc','CD vs FC','pct',semCump],['falta','FC Mes − Entregado','n0']],
     total:true}
 };
@@ -262,8 +263,8 @@ function renderView(){
   T.tBodies[0].innerHTML=body||`<tr><td class="t" colspan="${V.cols.length}">No hay SKUs con estos filtros.</td></tr>`;
   const cnt=(k,lim)=>f.filter(r=>r[k]<lim).length;
   let k=[];
-  if(VIEW==='d1')k=[['SKUs con venta',f.length,''],['Cobertura < 5 días',cnt('tot1',5),'r'],['Cobertura 5–7 días',f.filter(r=>r.tot1>=5&&r.tot1<7).length,'a'],['Cobertura negativa',cnt('tot1',0),'r']];
-  if(VIEW==='d3')k=[['SKUs',f.length,''],['TOTAL DC negativo',cnt('tot3',0),'r'],['TOTAL DC < 1 (menos de 3 días)',cnt('tot3',1),'a'],['En riesgo sin plan de producción',f.filter(r=>r.planta==='Sin Plan'&&r.tot3<1).length,'a']];
+  if(VIEW==='d1')k=[['SKUs con venta',f.length,''],['Cobertura < 4 días',cnt('tot1',4),'r'],['Cobertura 4–6 días',f.filter(r=>r.tot1>=4&&r.tot1<=6).length,'a'],['Cobertura negativa',cnt('tot1',0),'r']];
+  if(VIEW==='d3')k=[['SKUs',f.length,''],['TOTAL DC negativo',cnt('tot3',0),'r'],['TOTAL DC < 2',cnt('tot3',2),'a'],['En riesgo sin plan de producción',f.filter(r=>r.planta==='Sin Plan'&&r.tot3<2).length,'a']];
   if(VIEW==='canal'){const s=k=>f.reduce((a,r)=>a+N(r[k]),0),ent=s('Volumen Entregado');
     k=[['Entregado CD',f0.format(ent),''],['CD vs FC MTD',f0.format(dv(ent,s('FC MES'))*100)+' %',''],['% KA',f0.format(dv(s('Entregado KA'),ent)*100)+' %',''],['% TAT',f0.format(dv(s('Entregado TAT'),ent)*100)+' %',''],['% Socios',f0.format(dv(s('Entregado Socios'),ent)*100)+' %',''],['FC Mes − Entregado',f0.format(s('FC TOTAL CD')-ent),'a']]}
   $('kpis').innerHTML=k.map(([l,v,c])=>`<div class="kpi ${c}"><div class="l">${l}</div><div class="v">${v}</div></div>`).join('');
