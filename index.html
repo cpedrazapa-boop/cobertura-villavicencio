@@ -52,14 +52,19 @@ button.pri{background:var(--acc);color:#fff;border-color:var(--acc)}button:disab
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;display:none}
 </style>
 </head>
-<body>
+<body data-modo="ver">
 <header>
   <h1>Cobertura de Inventarios · Villavicencio</h1>
   <div class="sub"><span id="sub">Cargando…</span><span id="stale"></span></div>
 </header>
 <section id="upd">
   <h3>Actualizar datos para todos</h3>
-  <p>Inicia sesión con tu cuenta de Google autorizada y sube los archivos de la semana. La página recalcula la pestaña Data con las mismas fórmulas del Excel y, al publicar, todos los que abran el enlace verán la nueva versión. También puedes subir el libro completo y se toman sus pestañas ZEXI_01, TMS y Preventa.</p>
+  <p>Entra con el correo y la contraseña de cargador y sube los archivos de la semana. La página recalcula la pestaña Data con las mismas fórmulas del Excel y, al publicar, todos los que abran el enlace verán la nueva versión. También puedes subir el libro completo y se toman sus pestañas ZEXI_01, TMS y Preventa.</p>
+  <div id="login" class="row" style="margin:0 0 12px">
+    <input type="email" id="lEmail" placeholder="Correo" autocomplete="username" style="font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)">
+    <input type="password" id="lPass" placeholder="Contraseña" autocomplete="current-password" style="font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)">
+    <button class="pri" id="bLogin">Entrar</button>
+  </div>
   <div class="drops">
     <label class="drop" id="dZ"><b>ZEXI_01 *</b><small>Inventario SAP: Material, Ce., Alm., Libre utiliz., In control-cal, Bloqueado</small><input type="file" accept=".xlsx,.xls,.xlsm,.csv" data-k="zexi"></label>
     <label class="drop" id="dT"><b>TMS</b><small>Archivo TMS (como Libro1): LLAVE, Fecha Arribo, HL. Si no lo subes, TMS queda en 0</small><input type="file" accept=".xlsx,.xls,.xlsm,.csv" data-k="tms"></label>
@@ -78,7 +83,7 @@ button.pri{background:var(--acc);color:#fff;border-color:var(--acc)}button:disab
   <label class="chk"><input type="checkbox" id="fMov" checked> Solo SKUs con inventario o venta</label>
   <button id="bCols">Columnas</button>
   <button id="bCopy">Copiar tabla</button>
-  <button id="bUpd" class="pri" style="display:none">Actualizar datos</button>
+  
   <span id="who" style="color:var(--mute);font-size:12px"></span><button id="bSalir" style="display:none">Salir</button>
 </div>
 <div id="cols"></div>
@@ -90,7 +95,7 @@ button.pri{background:var(--acc);color:#fff;border-color:var(--acc)}button:disab
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { firebaseConfig, EDITORES } from "./firebase-config.js";
 const DEFAULT_COLS=['Material','Descripcion','Marca','Lines','tipo','UM','Inv. Final','Total Disponible','Inv. Transito','FC Dia','Dias cobertura','Stock Seguridad DC','Riesgo HL','Venta Total','Stock out'];
 const TEXT_COLS=new Set(['Llave','Tipo PT','Marca','Lines','Centro','Descripcion','UM','tipo','TMS','Fecha Arribo TMS','Fecha Prox Prod']);
@@ -127,9 +132,10 @@ async function loadChunks(meta){
   return true;
 }
 const COL='cobertura';
+const MODO=document.body.dataset.modo||'ver';
 function configOk(){return firebaseConfig&&firebaseConfig.apiKey&&!/PEGA|TU_/i.test(firebaseConfig.apiKey)}
 async function init(){
-  $('bUpd').style.display='';
+  if(MODO==='cargar'){$('upd').style.display='block';$('bCancel').style.display='none'}
   if(!configOk()){loadStatic('sin conexión a Firebase: revisa firebase-config.js');return}
   try{const app=initializeApp(firebaseConfig);FB=getFirestore(app);AUTH=getAuth(app)}catch(e){loadStatic('error al iniciar Firebase');return}
   onAuthStateChanged(AUTH,u=>{USER=u;authUI()});
@@ -144,8 +150,10 @@ async function init(){
 function puedeEditar(){return USER&&EDITORES.map(e=>e.toLowerCase()).includes((USER.email||'').toLowerCase())}
 function authUI(){
   $('who').textContent=USER?`Sesión: ${USER.email}`:'';
+  $('login').style.display=USER?'none':'';
+  if(pending)$('bPub').disabled=!(FB&&puedeEditar());
   $('bSalir').style.display=USER?'':'none';
-  if($('upd').style.display==='block'&&USER&&!puedeEditar())msg('Tu correo no está autorizado para publicar. Pide que lo agreguen en firebase-config.js y en las reglas.',true);
+  if($('upd').style.display==='block'&&USER&&!puedeEditar())msg('Tu correo no está autorizado para publicar. Debe estar en firebase-config.js y en las reglas de Firestore.',true);
 }
 function fillSel(id,k){const s=$(id);[...new Set(rows.map(r=>r[k]).filter(Boolean))].sort().forEach(v=>s.add(new Option(v,v)))}
 function buildCols(){
@@ -195,11 +203,12 @@ $('bCopy').onclick=async()=>{
 function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2200)}
 /* ---------- Cargador ---------- */
 const files={};
-$('bUpd').onclick=async()=>{
-  $('upd').style.display='block';$('upd').scrollIntoView({behavior:'smooth'});
-  if(FB&&!USER){try{await signInWithPopup(AUTH,new GoogleAuthProvider())}catch(e){msg('No se pudo iniciar sesión con Google ('+(e.code||e.message)+')',true)}}
-  authUI();
+$('bLogin').onclick=async()=>{
+  if(!FB){msg('Falta configurar Firebase (firebase-config.js).',true);return}
+  try{await signInWithEmailAndPassword(AUTH,$('lEmail').value.trim(),$('lPass').value);msg('')}
+  catch(e){msg(/invalid|wrong|not-found|credential/.test(e.code||'')?'Correo o contraseña incorrectos.':'No se pudo entrar ('+(e.code||e.message)+')',true)}
 };
+$('lPass').addEventListener('keydown',e=>{if(e.key==='Enter')$('bLogin').click()});
 $('bSalir').onclick=()=>signOut(AUTH);
 $('bCancel').onclick=()=>{$('upd').style.display='none'};
 function readWb(file){return file.arrayBuffer().then(b=>XLSX.read(b,{type:'array',cellDates:true}))}
@@ -237,7 +246,7 @@ async function preview(){
   msg(`Listo: ${res.stats.skusConZexi} de ${res.rows.length} SKUs encontrados en ZEXI_01. Revisa la tabla y publica.`);
   $('bPub').disabled=!(FB&&puedeEditar());
   if(!FB)msg('Vista previa local: falta configurar Firebase para poder publicar.',true);
-  else if(!USER)msg('Inicia sesión con Google (botón Actualizar datos) para publicar.',true);
+  else if(!USER)msg('Entra con tu correo y contraseña para publicar.',true);
   else if(!puedeEditar())msg('Tu correo no está autorizado para publicar.',true);
 }
 $('bPub').onclick=async()=>{

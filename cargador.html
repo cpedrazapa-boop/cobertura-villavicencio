@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cargador · Cobertura de Inventarios Villavicencio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1b1f24;--mute:#667085;--line:#e4e7ec;--acc:#1f5fbf;--red:#c0362c;--redbg:#fdecea;--amb:#b26a00;--ambbg:#fff4e0;--grn:#1d7a46;--grnbg:#e7f6ed}
+@media (prefers-color-scheme:dark){:root{--bg:#111418;--card:#1a1e24;--ink:#e8eaed;--mute:#98a2b3;--line:#2c323a;--acc:#6aa3ff;--red:#ff7b70;--redbg:#3a1d1b;--amb:#ffb648;--ambbg:#3a2c14;--grn:#5fd08f;--grnbg:#16301f}}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+header{padding:20px 24px 8px}
+h1{margin:0;font-size:22px;font-weight:700}
+.sub{color:var(--mute);margin-top:4px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;padding:12px 24px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.kpi .l{color:var(--mute);font-size:12px;font-weight:500}
+.kpi .v{font-size:24px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums}
+.kpi.r .v{color:var(--red)}.kpi.a .v{color:var(--amb)}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 24px}
+input[type=search],select{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+input[type=search]{min-width:240px}
+label.chk{display:flex;gap:6px;align-items:center;color:var(--mute)}
+button{font:inherit;padding:7px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--acc)}
+.wrap{margin:8px 24px 24px;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:auto;max-height:70vh}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);white-space:nowrap;text-align:right}
+th{position:sticky;top:0;background:var(--card);font-weight:600;font-size:12px;color:var(--mute);cursor:pointer;user-select:none;z-index:1}
+th:hover{color:var(--ink)}
+td.t,th.t{text-align:left}
+td.desc{max-width:280px;overflow:hidden;text-overflow:ellipsis}
+tr:hover td{background:color-mix(in srgb,var(--acc) 6%,transparent)}
+.pill{display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px;font-weight:600}
+.p-r{background:var(--redbg);color:var(--red)}.p-a{background:var(--ambbg);color:var(--amb)}.p-g{background:var(--grnbg);color:var(--grn)}.p-n{color:var(--mute)}
+.foot{color:var(--mute);font-size:12px;padding:0 24px 24px}
+#cols{display:none;margin:0 24px;padding:12px;background:var(--card);border:1px solid var(--line);border-radius:10px;columns:4 180px}
+#cols label{display:block;padding:2px 0}
+#upd{display:none;margin:8px 24px;padding:16px;background:var(--card);border:1px solid var(--line);border-radius:10px}
+#upd h3{margin:0 0 4px;font-size:15px}#upd p{margin:4px 0 12px;color:var(--mute)}
+.drops{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.drop{border:1.5px dashed var(--line);border-radius:10px;padding:12px;cursor:pointer}
+.drop.ok{border-color:var(--grn);border-style:solid}.drop.err{border-color:var(--red)}
+.drop b{display:block}.drop small{color:var(--mute);display:block;margin-top:4px;white-space:normal}
+.drop input{display:none}
+.row{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+button.pri{background:var(--acc);color:#fff;border-color:var(--acc)}button:disabled{opacity:.5;cursor:default}
+#msg{color:var(--mute)}#msg.e{color:var(--red)}
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--ambbg);color:var(--amb);font-size:12px;font-weight:600;margin-left:6px}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;display:none}
+</style>
+</head>
+<body data-modo="cargar">
+<header>
+  <h1>Cargador · Cobertura de Inventarios Villavicencio</h1><div class="sub"><a href="index.html" style="color:var(--acc)">Ver la página pública →</a></div>
+  <div class="sub"><span id="sub">Cargando…</span><span id="stale"></span></div>
+</header>
+<section id="upd">
+  <h3>Actualizar datos para todos</h3>
+  <p>Entra con el correo y la contraseña de cargador y sube los archivos de la semana. La página recalcula la pestaña Data con las mismas fórmulas del Excel y, al publicar, todos los que abran el enlace verán la nueva versión. También puedes subir el libro completo y se toman sus pestañas ZEXI_01, TMS y Preventa.</p>
+  <div id="login" class="row" style="margin:0 0 12px">
+    <input type="email" id="lEmail" placeholder="Correo" autocomplete="username" style="font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)">
+    <input type="password" id="lPass" placeholder="Contraseña" autocomplete="current-password" style="font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)">
+    <button class="pri" id="bLogin">Entrar</button>
+  </div>
+  <div class="drops">
+    <label class="drop" id="dZ"><b>ZEXI_01 *</b><small>Inventario SAP: Material, Ce., Alm., Libre utiliz., In control-cal, Bloqueado</small><input type="file" accept=".xlsx,.xls,.xlsm,.csv" data-k="zexi"></label>
+    <label class="drop" id="dT"><b>TMS</b><small>Archivo TMS (como Libro1): LLAVE, Fecha Arribo, HL. Si no lo subes, TMS queda en 0</small><input type="file" accept=".xlsx,.xls,.xlsm,.csv" data-k="tms"></label>
+    <label class="drop" id="dP"><b>Preventa *</b><small>Bloques "PREVENTA D+1" y "PREVENTA D+3": SKU, CO GC Llanos, CO KA OFF Sur, Total</small><input type="file" accept=".xlsx,.xls,.xlsm,.csv" data-k="prev"></label>
+    <label class="drop" id="dW"><b>…o el libro completo</b><small>Excel con las pestañas ZEXI_01, TMS y Preventa</small><input type="file" accept=".xlsx,.xlsm" data-k="wb"></label>
+  </div>
+  <div class="row"><button class="pri" id="bPub" disabled>Publicar para todos</button><button id="bCancel">Cerrar</button><span id="msg"></span></div>
+</section>
+<section class="kpis" id="kpis"></section>
+<div class="bar">
+  <input type="search" id="q" placeholder="Buscar material, descripción o marca…">
+  <select id="fMarca"><option value="">Todas las marcas</option></select>
+  <select id="fLines"><option value="">Todas las líneas</option></select>
+  <select id="fTipo"><option value="">Todos los empaques</option></select>
+  <select id="fEstado"><option value="">Todos los estados</option><option>Stock out</option><option>Bajo SS</option><option>OK</option><option>Sin venta</option></select>
+  <label class="chk"><input type="checkbox" id="fMov" checked> Solo SKUs con inventario o venta</label>
+  <button id="bCols">Columnas</button>
+  <button id="bCopy">Copiar tabla</button>
+  
+  <span id="who" style="color:var(--mute);font-size:12px"></span><button id="bSalir" style="display:none">Salir</button>
+</div>
+<div id="cols"></div>
+<div class="wrap"><table id="tbl"><thead></thead><tbody></tbody></table></div>
+<div class="foot" id="foot"></div>
+<div id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="engine.js"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { firebaseConfig, EDITORES } from "./firebase-config.js";
+const DEFAULT_COLS=['Material','Descripcion','Marca','Lines','tipo','UM','Inv. Final','Total Disponible','Inv. Transito','FC Dia','Dias cobertura','Stock Seguridad DC','Riesgo HL','Venta Total','Stock out'];
+const TEXT_COLS=new Set(['Llave','Tipo PT','Marca','Lines','Centro','Descripcion','UM','tipo','TMS','Fecha Arribo TMS','Fecha Prox Prod']);
+let D,cols,rows=[],shown=[],sortK='Dias cobertura',sortDir=1,vis;
+const nf=new Intl.NumberFormat('es-CO',{maximumFractionDigits:1});
+const $=id=>document.getElementById(id);
+function estado(r){
+  const fc=+r['FC Dia']||0, inv=+r['Inv. Final']||0, dc=+r['Dias cobertura']||0, ss=+r['Stock Seguridad DC']||0;
+  if(fc<=0) return 'Sin venta';
+  if(inv<=0) return 'Stock out';
+  if(ss>0 && dc<ss) return 'Bajo SS';
+  return 'OK';
+}
+const pill={'Stock out':'p-r','Bajo SS':'p-a','OK':'p-g','Sin venta':'p-n'};
+let MASTER=null,firstLoad=true,curVersion=null,FB=null,AUTH=null,USER=null;
+function setData(d,info){
+  D=d;cols=d.columns;
+  rows=d.rows.map(a=>{const o={};cols.forEach((c,i)=>o[c]=a[i]);o.Estado=estado(o);return o});
+  if(firstLoad){
+    let saved=null;try{saved=JSON.parse(localStorage.getItem('cov_cols'))}catch(e){}
+    vis=new Set((saved&&saved.length?saved:DEFAULT_COLS).filter(c=>cols.includes(c)));
+    fillSel('fMarca','Marca');fillSel('fLines','Lines');fillSel('fTipo','tipo');buildCols();firstLoad=false;
+  }
+  $('sub').textContent=`Semana ${d.semana} · Centro ${d.centro} · ${rows.length} SKUs · actualizado ${d.generado}${info?' · '+info:''}`;
+  render();
+}
+async function loadStatic(note){
+  try{const d=await (await fetch('data.json',{cache:'no-store'})).json();setData(d,note||'')}catch(e){$('sub').textContent='No se pudieron cargar los datos.'}
+}
+async function loadChunks(meta){
+  const parts=await Promise.all(Array.from({length:meta.chunks},(_,i)=>getDoc(doc(FB,COL,'c'+i))));
+  const all=[];for(const p of parts){const b=p.exists()?p.data():null;if(!b||b.version!==meta.version)return false;all.push(...JSON.parse(b.rows))}
+  setData({columns:meta.columns,rows:all,semana:meta.semana,centro:meta.centro,generado:meta.generado},meta.por?'por '+meta.por:'');
+  return true;
+}
+const COL='cobertura';
+const MODO=document.body.dataset.modo||'ver';
+function configOk(){return firebaseConfig&&firebaseConfig.apiKey&&!/PEGA|TU_/i.test(firebaseConfig.apiKey)}
+async function init(){
+  if(MODO==='cargar'){$('upd').style.display='block';$('bCancel').style.display='none'}
+  if(!configOk()){loadStatic('sin conexión a Firebase: revisa firebase-config.js');return}
+  try{const app=initializeApp(firebaseConfig);FB=getFirestore(app);AUTH=getAuth(app)}catch(e){loadStatic('error al iniciar Firebase');return}
+  onAuthStateChanged(AUTH,u=>{USER=u;authUI()});
+  const timer=setTimeout(()=>{if(!D)loadStatic('versión base (no se pudo leer Firebase)')},10000);
+  onSnapshot(doc(FB,COL,'meta'),async snap=>{
+    clearTimeout(timer);$('stale').innerHTML='';
+    if(!snap.exists()){if(!D)loadStatic('versión base del Excel');return}
+    const meta=snap.data();if(meta.version===curVersion)return;
+    if(await loadChunks(meta)){if(curVersion)toast('Datos actualizados');curVersion=meta.version}
+  },err=>{clearTimeout(timer);if(!D)loadStatic('versión base (no se pudo leer Firebase)')});
+}
+function puedeEditar(){return USER&&EDITORES.map(e=>e.toLowerCase()).includes((USER.email||'').toLowerCase())}
+function authUI(){
+  $('who').textContent=USER?`Sesión: ${USER.email}`:'';
+  $('login').style.display=USER?'none':'';
+  if(pending)$('bPub').disabled=!(FB&&puedeEditar());
+  $('bSalir').style.display=USER?'':'none';
+  if($('upd').style.display==='block'&&USER&&!puedeEditar())msg('Tu correo no está autorizado para publicar. Debe estar en firebase-config.js y en las reglas de Firestore.',true);
+}
+function fillSel(id,k){const s=$(id);[...new Set(rows.map(r=>r[k]).filter(Boolean))].sort().forEach(v=>s.add(new Option(v,v)))}
+function buildCols(){
+  $('cols').innerHTML=cols.map(c=>`<label><input type="checkbox" data-c="${c}" ${vis.has(c)?'checked':''}> ${c}</label>`).join('');
+  $('cols').querySelectorAll('input').forEach(i=>i.onchange=()=>{i.checked?vis.add(i.dataset.c):vis.delete(i.dataset.c);try{localStorage.setItem('cov_cols',JSON.stringify([...vis]))}catch(e){};render()});
+}
+function filtered(){
+  const q=$('q').value.toLowerCase().trim(),m=$('fMarca').value,l=$('fLines').value,t=$('fTipo').value,e=$('fEstado').value,mov=$('fMov').checked;
+  return rows.filter(r=>(!m||r.Marca===m)&&(!l||r.Lines===l)&&(!t||r.tipo===t)&&(!e||r.Estado===e)
+    &&(!mov||(+r['Inv. Final']||0)>0||(+r['FC Dia']||0)>0||(+r['Venta Total']||0)>0)
+    &&(!q||(String(r.Material)+' '+r.Descripcion+' '+r.Marca).toLowerCase().includes(q)));
+}
+function render(){
+  const f=filtered();
+  const ord=['Estado',...cols.filter(c=>vis.has(c))];
+  f.sort((a,b)=>{let x=a[sortK],y=b[sortK];
+    if(sortK==='Estado'){const o={'Stock out':0,'Bajo SS':1,'OK':2,'Sin venta':3};x=o[x];y=o[y]}
+    if(x==null||x==='')return 1;if(y==null||y==='')return -1;
+    return (typeof x==='number'&&typeof y==='number'?x-y:String(x).localeCompare(String(y)))*sortDir});
+  shown=f;
+  $('tbl').tHead.innerHTML='<tr>'+ord.map(c=>`<th class="${TEXT_COLS.has(c)||c==='Estado'?'t':''}" data-k="${c}">${c}${sortK===c?(sortDir>0?' ▲':' ▼'):''}</th>`).join('')+'</tr>';
+  $('tbl').tHead.querySelectorAll('th').forEach(th=>th.onclick=()=>{const k=th.dataset.k;if(sortK===k)sortDir*=-1;else{sortK=k;sortDir=1}render()});
+  $('tbl').tBodies[0].innerHTML=f.map(r=>'<tr>'+ord.map(c=>{
+    const v=r[c];
+    if(c==='Estado')return `<td class="t"><span class="pill ${pill[v]}">${v}</span></td>`;
+    if(TEXT_COLS.has(c)||typeof v!=='number')return `<td class="t${c==='Descripcion'?' desc':''}" title="${v??''}">${v??''}</td>`;
+    return `<td>${nf.format(v)}</td>`}).join('')+'</tr>').join('');
+  const cnt=s=>f.filter(r=>r.Estado===s).length,sum=k=>f.reduce((a,r)=>a+(+r[k]||0),0);
+  const fc=sum('FC Dia');
+  $('kpis').innerHTML=[
+    ['SKUs en vista',f.length,''],
+    ['Stock out',cnt('Stock out'),'r'],
+    ['Bajo stock de seguridad',cnt('Bajo SS'),'a'],
+    ['Inventario en piso (HL)',nf.format(sum('Inv. Piso')),''],
+    ['Cobertura ponderada (días)',fc>0?nf.format(sum('Inv. Piso')/fc):'–',''],
+    ['Riesgo HL (total)',nf.format(sum('Riesgo HL')),'r']
+  ].map(([l,v,c])=>`<div class="kpi ${c}"><div class="l">${l}</div><div class="v">${v}</div></div>`).join('');
+  $('foot').textContent=`Mostrando ${f.length} de ${rows.length} SKUs. Estado: Stock out = sin inventario con FC > 0; Bajo SS = días de cobertura menores al stock de seguridad DC. Cobertura ponderada = Inv. Piso (HL) ÷ FC Día (HL) del filtro.`;
+}
+['q','fMarca','fLines','fTipo','fEstado','fMov'].forEach(id=>$(id).addEventListener('input',render));
+$('bCols').onclick=()=>{const c=$('cols');c.style.display=c.style.display==='block'?'none':'block'};
+$('bCopy').onclick=async()=>{
+  const ord=['Estado',...cols.filter(c=>vis.has(c))];
+  const txt=[ord.join('\t'),...shown.map(r=>ord.map(c=>r[c]??'').join('\t'))].join('\n');
+  try{await navigator.clipboard.writeText(txt);toast('Tabla copiada: pégala en Excel')}catch(e){toast('No se pudo copiar')}
+};
+function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2200)}
+/* ---------- Cargador ---------- */
+const files={};
+$('bLogin').onclick=async()=>{
+  if(!FB){msg('Falta configurar Firebase (firebase-config.js).',true);return}
+  try{await signInWithEmailAndPassword(AUTH,$('lEmail').value.trim(),$('lPass').value);msg('')}
+  catch(e){msg(/invalid|wrong|not-found|credential/.test(e.code||'')?'Correo o contraseña incorrectos.':'No se pudo entrar ('+(e.code||e.message)+')',true)}
+};
+$('lPass').addEventListener('keydown',e=>{if(e.key==='Enter')$('bLogin').click()});
+$('bSalir').onclick=()=>signOut(AUTH);
+$('bCancel').onclick=()=>{$('upd').style.display='none'};
+function readWb(file){return file.arrayBuffer().then(b=>XLSX.read(b,{type:'array',cellDates:true}))}
+const boxes={zexi:'dZ',tms:'dT',prev:'dP',wb:'dW'};
+function mark(k,ok,txt){const el=$(boxes[k]);el.classList.toggle('ok',!!ok);el.classList.toggle('err',ok===false);el.querySelector('small').textContent=txt}
+let pending=null;
+document.querySelectorAll('#upd input[type=file]').forEach(inp=>inp.onchange=async()=>{
+  const f=inp.files[0];if(!f)return;const k=inp.dataset.k;
+  try{
+    if(typeof XLSX==='undefined'||typeof Engine==='undefined')throw new Error('No cargó el lector de Excel; recarga la página');
+    const wb=await readWb(f);
+    if(k==='wb'){
+      const z=Engine.parseZexi(Engine.pickSheet(wb,XLSX,['ZEXI_01','ZEXI']).rows);files.zexi=z;mark('zexi',true,`${f.name} · ${z.length} filas`);
+      try{const t=Engine.parseTms(Engine.pickSheet(wb,XLSX,['TMS']).rows);files.tms=t;mark('tms',true,`${f.name} · ${t.length} filas`)}catch(e){files.tms=[];mark('tms',null,'Sin TMS en el libro: queda en 0')}
+      const p=Engine.parsePreventa(Engine.pickSheet(wb,XLSX,['Preventa']).rows);files.prev=p;mark('prev',true,`${f.name} · ${Object.keys(p.d1).length} SKUs D+1, ${Object.keys(p.d3).length} D+3`);
+      mark('wb',true,f.name);
+    }else{
+      const names={zexi:['ZEXI_01','ZEXI'],tms:['TMS'],prev:['Preventa']}[k];
+      const rowsX=Engine.pickSheet(wb,XLSX,names).rows;
+      if(k==='zexi'){files.zexi=Engine.parseZexi(rowsX);mark(k,true,`${f.name} · ${files.zexi.length} filas`)}
+      if(k==='tms'){files.tms=Engine.parseTms(rowsX);mark(k,true,`${f.name} · ${files.tms.length} filas`)}
+      if(k==='prev'){files.prev=Engine.parsePreventa(rowsX);mark(k,true,`${f.name} · ${Object.keys(files.prev.d1).length} SKUs D+1, ${Object.keys(files.prev.d3).length} D+3`)}
+    }
+    await preview();
+  }catch(e){mark(k,false,e.message);msg(e.message,true)}
+});
+function msg(t,e){$('msg').textContent=t;$('msg').className=e?'e':''}
+async function preview(){
+  if(!files.zexi||!files.prev){$('bPub').disabled=true;msg('Faltan '+[!files.zexi&&'ZEXI_01',!files.prev&&'Preventa'].filter(Boolean).join(' y '));return}
+  if(!MASTER)MASTER=(await (await fetch('master.json',{cache:'no-store'})).json()).items;
+  const res=Engine.compute(MASTER,files.zexi,files.tms||[],files.prev,new Date());
+  const now=new Date(),pad=n=>String(n).padStart(2,'0');
+  res.generado=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  pending=res;setData(res,'vista previa sin publicar');$('stale').innerHTML='<span class="badge">Vista previa</span>';
+  msg(`Listo: ${res.stats.skusConZexi} de ${res.rows.length} SKUs encontrados en ZEXI_01. Revisa la tabla y publica.`);
+  $('bPub').disabled=!(FB&&puedeEditar());
+  if(!FB)msg('Vista previa local: falta configurar Firebase para poder publicar.',true);
+  else if(!USER)msg('Entra con tu correo y contraseña para publicar.',true);
+  else if(!puedeEditar())msg('Tu correo no está autorizado para publicar.',true);
+}
+$('bPub').onclick=async()=>{
+  if(!pending||!FB||!puedeEditar())return;$('bPub').disabled=true;msg('Publicando…');
+  try{
+    const version=Date.now().toString(36),size=150,n=Math.ceil(pending.rows.length/size);
+    const batch=writeBatch(FB);
+    for(let i=0;i<n;i++)batch.set(doc(FB,COL,'c'+i),{version,rows:JSON.stringify(pending.rows.slice(i*size,(i+1)*size))});
+    batch.set(doc(FB,COL,'meta'),{version,chunks:n,columns:pending.columns,semana:pending.semana,centro:pending.centro,generado:pending.generado,por:USER.displayName||USER.email,stats:pending.stats});
+    await batch.commit();
+    curVersion=null;msg('Publicado. Todos ven ahora esta versión.');toast('Publicado para todos');$('stale').innerHTML='';
+  }catch(e){msg(e&&e.code==='permission-denied'?'Firebase rechazó la escritura: tu correo no está en las reglas de Firestore.':'No se pudo publicar ('+(e.code||e.message||e)+')',true);$('bPub').disabled=false}
+};
+init();
+</script>
+</body>
+</html>
