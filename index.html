@@ -49,6 +49,16 @@ tr:hover td{background:color-mix(in srgb,var(--acc) 6%,transparent)}
 button.pri{background:var(--acc);color:#fff;border-color:var(--acc)}button:disabled{opacity:.5;cursor:default}
 #msg{color:var(--mute)}#msg.e{color:var(--red)}
 .badge{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--ambbg);color:var(--amb);font-size:12px;font-weight:600;margin-left:6px}
+nav.tabs{display:flex;gap:4px;padding:4px 24px 0;flex-wrap:wrap}
+nav.tabs button{border-radius:8px 8px 0 0;border-bottom:none;font-weight:600;color:var(--mute)}
+nav.tabs button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+table.v th.vtitle{top:0}
+.vtitle{background:#1f2937;color:#fff;text-align:center;font-weight:700;letter-spacing:.04em;padding:8px;font-size:13px;position:sticky;top:0;z-index:2}
+table.v th{background:#f2c200;color:#1b1f24;top:33px;white-space:normal;vertical-align:bottom;font-weight:700}
+@media (prefers-color-scheme:dark){table.v th{background:#8a6d00;color:#fff}}
+td.c-r{background:#f8c9c4;color:#7a1d15}td.c-y{background:#fbe7a1;color:#6b4e00}td.c-g{background:#bfe6c9;color:#14532d}
+@media (prefers-color-scheme:dark){td.c-r{background:#5a2420;color:#ffb4ab}td.c-y{background:#4d3d10;color:#ffd970}td.c-g{background:#1d3d27;color:#9fe0b4}}
+td.b{font-weight:700}
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;display:none}
 </style>
 </head>
@@ -73,6 +83,12 @@ button.pri{background:var(--acc);color:#fff;border-color:var(--acc)}button:disab
   </div>
   <div class="row"><button class="pri" id="bPub" disabled>Publicar para todos</button><button id="bCancel">Cerrar</button><span id="msg"></span></div>
 </section>
+<nav class="tabs" id="tabs">
+  <button data-v="d1" class="on">Cobertura D+1 (Tránsitos)</button>
+  <button data-v="d3">Cobertura D+3</button>
+  <button data-v="canal">Volumen entregado x canal</button>
+  <button data-v="data">Tabla completa</button>
+</nav>
 <section class="kpis" id="kpis"></section>
 <div class="bar">
   <input type="search" id="q" placeholder="Buscar material, descripción o marca…">
@@ -166,14 +182,15 @@ function filtered(){
     &&(!mov||(+r['Inv. Final']||0)>0||(+r['FC Dia']||0)>0||(+r['Venta Total']||0)>0)
     &&(!q||(String(r.Material)+' '+r.Descripcion+' '+r.Marca).toLowerCase().includes(q)));
 }
-function render(){
+function renderData(){
+  $('tbl').className='';$('bCols').style.display='';
   const f=filtered();
   const ord=['Estado',...cols.filter(c=>vis.has(c))];
   f.sort((a,b)=>{let x=a[sortK],y=b[sortK];
     if(sortK==='Estado'){const o={'Stock out':0,'Bajo SS':1,'OK':2,'Sin venta':3};x=o[x];y=o[y]}
     if(x==null||x==='')return 1;if(y==null||y==='')return -1;
     return (typeof x==='number'&&typeof y==='number'?x-y:String(x).localeCompare(String(y)))*sortDir});
-  shown=f;
+  shown=f;copyData={h:ord,r:f.map(r=>ord.map(c=>r[c]??''))};
   $('tbl').tHead.innerHTML='<tr>'+ord.map(c=>`<th class="${TEXT_COLS.has(c)||c==='Estado'?'t':''}" data-k="${c}">${c}${sortK===c?(sortDir>0?' ▲':' ▼'):''}</th>`).join('')+'</tr>';
   $('tbl').tHead.querySelectorAll('th').forEach(th=>th.onclick=()=>{const k=th.dataset.k;if(sortK===k)sortDir*=-1;else{sortK=k;sortDir=1}render()});
   $('tbl').tBodies[0].innerHTML=f.map(r=>'<tr>'+ord.map(c=>{
@@ -193,11 +210,71 @@ function render(){
   ].map(([l,v,c])=>`<div class="kpi ${c}"><div class="l">${l}</div><div class="v">${v}</div></div>`).join('');
   $('foot').textContent=`Mostrando ${f.length} de ${rows.length} SKUs. Estado: Stock out = sin inventario con FC > 0; Bajo SS = días de cobertura menores al stock de seguridad DC. Cobertura ponderada = Inv. Piso (HL) ÷ FC Día (HL) del filtro.`;
 }
+
+/* ---------- Vistas ---------- */
+let VIEW='d1',copyData={h:[],r:[]};
+try{const h=location.hash.slice(1);if(['d1','d3','canal','data'].includes(h))VIEW=h}catch(e){}
+const N=v=>+v||0, dv=(a,b)=>b?a/b:0;
+const f0=new Intl.NumberFormat('es-CO',{maximumFractionDigits:0}),f1=new Intl.NumberFormat('es-CO',{minimumFractionDigits:1,maximumFractionDigits:1});
+const fmt={n0:v=>f0.format(v),n1:v=>f1.format(v),pct:v=>f0.format(v*100)+' %',t:v=>v??''};
+const semDC=v=>v<5?'c-r':v<7?'c-y':'c-g';            // días de cobertura
+const semDC3=v=>v<1?'c-r':v<2?'c-y':'c-g';         // cobertura en bloques de 3 días
+const semPct=v=>v<0.25?'c-r':v<0.5?'c-y':'c-g';       // participación por canal
+const semCump=v=>v<0.8?'c-r':v<0.95?'c-y':'c-g';      // cumplimiento CD vs FC
+function diasProd(r){const f=r['Fecha Prox Prod'];if(!f)return 0;const d=new Date(String(f).slice(0,10)+'T00:00:00');if(isNaN(d))return 0;const t=new Date();t.setHours(0,0,0,0);return Math.round((d-t)/864e5)}
+const VIEWS={
+  d1:{title:'DÍAS COBERTURA TRÁNSITOS (D+1)',filter:r=>N(r['FC Dia'])>0,sort:['Material',1],
+    note:'TOTAL = DC Bodega + DC Tránsitos − DC Preventa (Venta W+1 ÷ FC Día). Verde ≥ 7 días, amarillo 5–7, rojo < 5.',
+    cols:[['Material','MATERIAL','t'],['Descripcion','Descripción','t'],['dcB','DC BODEGA','n1'],['dcT','DC TRÁNSITOS','n1'],['dcP1','DC PREVENTA','n1'],['tot1','TOTAL','n1',semDC],['FC Dia','FC DÍA','n0'],['DC TMS','DC TMS','n0'],['PRD 1,5 PQ','PRD 1,5 PQ','n0']]},
+  d3:{title:'DÍAS COBERTURA D+3',filter:r=>N(r['FC Dia'])>0||N(r['VENTA D+3'])>0,sort:['tot3',1],
+    note:'Días calculados sobre FC Día x3. TOTAL DC = DC Bodega + DC Tránsitos − DC Preventa D+3 (Venta D+3 ÷ FC Día x3). Rojo < 1, amarillo 1–2, verde ≥ 2. Ordenado de menor a mayor.',
+    cols:[['Material','MATERIAL','t'],['Descripcion','Descripción','t'],['dcB3','DC BODEGA','n1'],['dcT3','DC TRÁNSITOS','n1'],['dcP3','DC PREVENTA','n1'],['tot3','TOTAL DC','n1',semDC3],['fc3','FC Día x3','n0'],['dProd','DÍAS PROD','n0'],['planta','PLANTA','t']]},
+  canal:{title:'VOLUMEN ENTREGADO X CANAL',filter:r=>N(r['FC TOTAL CD'])>0||N(r['Volumen Entregado'])>0,sort:['FC TOTAL CD',-1],
+    note:'% por canal = entregado del canal ÷ Entregado CD. CD vs FC = Entregado CD ÷ FC MTD (verde ≥ 95 %, amarillo 80–95 %, rojo < 80 %). FC Mes − Entregado = FC Total CD − Entregado CD.',
+    cols:[['Material','Material','t'],['Descripcion','Descripción','t'],['FC TOTAL CD','FC TOTAL CD','n0'],['FC MES','FC MTD','n0'],['Entregado KA','Entregado KA','n0'],['Entregado TAT','Entregado TAT','n0'],['Entregado Socios','Entregado Socios','n0'],['Volumen Entregado','Entregado CD','n0'],['pKA','%_KA','pct',semPct],['pTAT','%_TAT','pct',semPct],['pSoc','%_SOCIOS','pct',semPct],['cdfc','CD vs FC','pct',semCump],['falta','FC Mes − Entregado','n0']],
+    total:true}
+};
+function derive(r){
+  const fc=N(r['FC Dia']),ent=N(r['Volumen Entregado']);
+  const o={dcB:dv(N(r['Inv. Piso']),fc),dcT:dv(N(r['Inv. Transito']),fc),dcP1:dv(N(r['Venta W+1']),fc),dcP3:dv(N(r['VENTA D+3']),fc)};
+  o.tot1=o.dcB+o.dcT-o.dcP1;o.fc3=fc*3;o.dcB3=dv(N(r['Inv. Piso']),o.fc3);o.dcT3=dv(N(r['Inv. Transito']),o.fc3);o.dcP3=dv(N(r['VENTA D+3']),o.fc3);o.tot3=o.dcB3+o.dcT3-o.dcP3;
+  o.dProd=diasProd(r);o.planta=r['Planta']||(r['Fecha Prox Prod']?'':'Sin Plan');
+  o.pKA=dv(N(r['Entregado KA']),ent);o.pTAT=dv(N(r['Entregado TAT']),ent);o.pSoc=dv(N(r['Entregado Socios']),ent);
+  o.cdfc=dv(ent,N(r['FC MES']));o.falta=N(r['FC TOTAL CD'])-ent;
+  return Object.assign({},r,o);
+}
+let vSort={};
+function renderView(){
+  const V=VIEWS[VIEW];$('bCols').style.display='none';$('cols').style.display='none';
+  const [sk,sd]=vSort[VIEW]||V.sort;
+  const f=filtered().map(derive).filter(V.filter);
+  f.sort((a,b)=>{const x=a[sk],y=b[sk];if(x==null||x==='')return 1;if(y==null||y==='')return -1;return (typeof x==='number'&&typeof y==='number'?x-y:String(x).localeCompare(String(y)))*sd});
+  shown=f;copyData={h:V.cols.map(c=>c[1]),r:f.map(r=>V.cols.map(([k,,t])=>t==='pct'?Math.round(r[k]*100)+'%':typeof r[k]==='number'?Math.round(r[k]*10)/10:(r[k]??'')))};
+  const T=$('tbl');T.className='v';
+  T.tHead.innerHTML=`<tr><th colspan="${V.cols.length}" class="vtitle">${V.title}</th></tr><tr>`+V.cols.map(([k,l,t])=>`<th class="${t==='t'?'t':''}" data-k="${k}">${l}${sk===k?(sd>0?' ▲':' ▼'):''}</th>`).join('')+'</tr>';
+  T.tHead.querySelectorAll('th[data-k]').forEach(th=>th.onclick=()=>{const k=th.dataset.k;vSort[VIEW]=(sk===k)?[k,-sd]:[k,1];render()});
+  let body=f.map(r=>'<tr>'+V.cols.map(([k,,t,sem])=>{const v=r[k];
+    if(t==='t')return `<td class="t${k==='Descripcion'?' desc':''}" title="${v??''}">${v??''}</td>`;
+    return `<td class="${sem?sem(v)+' b':''}">${fmt[t](v)}</td>`}).join('')+'</tr>').join('');
+  if(V.total&&f.length){const s=k=>f.reduce((a,r)=>a+N(r[k]),0),ent=s('Volumen Entregado');
+    const tot={'FC TOTAL CD':s('FC TOTAL CD'),'FC MES':s('FC MES'),'Entregado KA':s('Entregado KA'),'Entregado TAT':s('Entregado TAT'),'Entregado Socios':s('Entregado Socios'),'Volumen Entregado':ent,pKA:dv(s('Entregado KA'),ent),pTAT:dv(s('Entregado TAT'),ent),pSoc:dv(s('Entregado Socios'),ent),cdfc:dv(ent,s('FC MES')),falta:s('FC TOTAL CD')-ent};
+    body+='<tr>'+V.cols.map(([k,,t],i)=>i===0?'<td class="t b">Total</td>':t==='t'?'<td></td>':`<td class="b">${tot[k]!=null?fmt[t](tot[k]):''}</td>`).join('')+'</tr>';}
+  T.tBodies[0].innerHTML=body||`<tr><td class="t" colspan="${V.cols.length}">No hay SKUs con estos filtros.</td></tr>`;
+  const cnt=(k,lim)=>f.filter(r=>r[k]<lim).length;
+  let k=[];
+  if(VIEW==='d1')k=[['SKUs con venta',f.length,''],['Cobertura < 5 días',cnt('tot1',5),'r'],['Cobertura 5–7 días',f.filter(r=>r.tot1>=5&&r.tot1<7).length,'a'],['Cobertura negativa',cnt('tot1',0),'r']];
+  if(VIEW==='d3')k=[['SKUs',f.length,''],['TOTAL DC negativo',cnt('tot3',0),'r'],['TOTAL DC < 1 (menos de 3 días)',cnt('tot3',1),'a'],['En riesgo sin plan de producción',f.filter(r=>r.planta==='Sin Plan'&&r.tot3<1).length,'a']];
+  if(VIEW==='canal'){const s=k=>f.reduce((a,r)=>a+N(r[k]),0),ent=s('Volumen Entregado');
+    k=[['Entregado CD',f0.format(ent),''],['CD vs FC MTD',f0.format(dv(ent,s('FC MES'))*100)+' %',''],['% KA',f0.format(dv(s('Entregado KA'),ent)*100)+' %',''],['% TAT',f0.format(dv(s('Entregado TAT'),ent)*100)+' %',''],['% Socios',f0.format(dv(s('Entregado Socios'),ent)*100)+' %',''],['FC Mes − Entregado',f0.format(s('FC TOTAL CD')-ent),'a']]}
+  $('kpis').innerHTML=k.map(([l,v,c])=>`<div class="kpi ${c}"><div class="l">${l}</div><div class="v">${v}</div></div>`).join('');
+  $('foot').textContent=`${f.length} SKUs. ${V.note}`;
+}
+function render(){ if(!D)return; VIEW==='data'?renderData():renderView(); }
+document.querySelectorAll('#tabs button').forEach(b=>{b.classList.toggle('on',b.dataset.v===VIEW);b.onclick=()=>{VIEW=b.dataset.v;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));try{history.replaceState(null,'','#'+VIEW)}catch(e){};render()}});
 ['q','fMarca','fLines','fTipo','fEstado','fMov'].forEach(id=>$(id).addEventListener('input',render));
 $('bCols').onclick=()=>{const c=$('cols');c.style.display=c.style.display==='block'?'none':'block'};
 $('bCopy').onclick=async()=>{
-  const ord=['Estado',...cols.filter(c=>vis.has(c))];
-  const txt=[ord.join('\t'),...shown.map(r=>ord.map(c=>r[c]??'').join('\t'))].join('\n');
+  const txt=[copyData.h.join('\t'),...copyData.r.map(r=>r.join('\t'))].join('\n');
   try{await navigator.clipboard.writeText(txt);toast('Tabla copiada: pégala en Excel')}catch(e){toast('No se pudo copiar')}
 };
 function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2200)}

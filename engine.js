@@ -1,7 +1,7 @@
 /* Motor de cálculo: replica las fórmulas de la pestaña "Data" del Excel
    Cobertura Inventarios Villavicencio a partir de ZEXI_01, TMS y Preventa. */
 (function (root) {
-  const COLUMNS = ['Llave','Semana','Tipo PT','Marca','Lines','Centro','Material','Descripcion','UM','Existencia','Cant entrega Pendien','Total Disponible','Cantidad en Pedidos','Inv. Final','tipo','presentacio','conte','Inv. Piso','Inv. Reservado','Venta Total','Preventa Hl','Venta tat','Venta Ka','Inv. Transito','Stock out','FC Dia','Dias cobertura','Stock Seguridad HL','Stock Seguridad DC','TMS','Fecha Arribo TMS','Fecha Prox Prod','Htls Prod Plan','Riesgo HL','Riesgo DC','FC TOTAL CD','FC MES','Volumen Entregado','Forescast KA','Forescaste TAT','FC MTD KA','Volumen Solicitado','%Cumpl. Ventas','Volumen recibido2','%Cumpl. T1','Venta W+1','Cumpl. CD','Cumpl. Ventas','Entregado TAT','Entregado KA','Entregado Socios','DC TMS','DC BODEGA','DC PREVENTA','DC TRANSITOS','VENTA D+3','PRD 1.5 EST','PRD 1,5 PQ'];
+  const COLUMNS = ['Llave','Semana','Tipo PT','Marca','Lines','Centro','Material','Descripcion','UM','Existencia','Cant entrega Pendien','Total Disponible','Cantidad en Pedidos','Inv. Final','tipo','presentacio','conte','Inv. Piso','Inv. Reservado','Venta Total','Preventa Hl','Venta tat','Venta Ka','Inv. Transito','Stock out','FC Dia','Dias cobertura','Stock Seguridad HL','Stock Seguridad DC','TMS','Fecha Arribo TMS','Fecha Prox Prod','Planta','Htls Prod Plan','Riesgo HL','Riesgo DC','FC TOTAL CD','FC MES','Volumen Entregado','Forescast KA','Forescaste TAT','FC MTD KA','Volumen Solicitado','%Cumpl. Ventas','Volumen recibido2','%Cumpl. T1','Venta W+1','Cumpl. CD','Cumpl. Ventas','Entregado TAT','Entregado KA','Entregado Socios','DC TMS','DC BODEGA','DC PREVENTA','DC TRANSITOS','VENTA D+3','PRD 1.5 EST','PRD 1,5 PQ'];
 
   const norm = s => String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
   const num = v => { if (v == null || v === '') return 0; if (typeof v === 'number') return v; const n = parseFloat(String(v).replace(/\s/g, '').replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.')); return isNaN(n) ? 0 : n; };
@@ -147,7 +147,7 @@
         'Descripcion': m.Descripcion, 'UM': m.UM, 'Existencia': J, 'Cant entrega Pendien': K, 'Total Disponible': L, 'Cantidad en Pedidos': M,
         'Inv. Final': N, 'tipo': m.tipo, 'presentacio': P, 'conte': Q, 'Inv. Piso': R, 'Inv. Reservado': S, 'Venta Total': T, 'Preventa Hl': U,
         'Venta tat': V, 'Venta Ka': W, 'Inv. Transito': X, 'Stock out': Y, 'FC Dia': Z, 'Dias cobertura': AA, 'Stock Seguridad HL': 0,
-        'Stock Seguridad DC': 0, 'TMS': AD, 'Fecha Arribo TMS': AE, 'Fecha Prox Prod': m['Fecha Prox Prod'], 'Htls Prod Plan': m['Htls Prod Plan'],
+        'Stock Seguridad DC': 0, 'TMS': AD, 'Fecha Arribo TMS': AE, 'Fecha Prox Prod': m['Fecha Prox Prod'], 'Planta': m.Planta || null, 'Htls Prod Plan': m['Htls Prod Plan'],
         'Riesgo HL': AI, 'Riesgo DC': AJ, 'FC TOTAL CD': AL, 'FC MES': AM, 'Volumen Entregado': AN, 'Forescast KA': AO,
         'Forescaste TAT': Math.max(0, AM - AO), 'FC MTD KA': AO * BJ, 'Volumen Solicitado': AR, '%Cumpl. Ventas': div(AR, AM),
         'Volumen recibido2': AT, '%Cumpl. T1': div(AT, AM), 'Venta W+1': AV, 'Cumpl. CD': div(AN, AM), 'Cumpl. Ventas': div(AR, AM),
