@@ -180,7 +180,7 @@ td.b{font-weight:700}
 <div id="toast"></div>
 <div id="tip"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="engine.js"></script>
+<script src="engine.js?v=4"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -498,7 +498,8 @@ function renderOcu(){
   const top=[...f].filter(r=>enBod(r)>0).sort((a,b)=>enBod(b)-enBod(a)).slice(0,12),mx=Math.max(1,...top.map(enBod));
   const tile=(h,v,u,cls,big,ncls)=>`<div class="tile ${cls||''} ${big?'big':''}"><div class="h">${h}</div><div class="n ${ncls||''}">${v}</div><div class="u">${u}</div></div>`;
   $('kpis').innerHTML='';
-  $('charts').innerHTML=`<div class="ocu full" style="grid-column:1/-1;padding:0">
+  const viejo=!cols.includes('Inv. Calidad');
+  $('charts').innerHTML=(viejo?`<div class="card full" style="grid-column:1/-1;border-color:var(--amb);background:var(--ambbg);color:var(--amb)"><b>Faltan datos:</b> la última publicación se hizo con una versión anterior del cargador, por eso PT en calidad, bloqueo, calle y la clasificación ABC salen en 0. Vuelve a publicar desde el cargador para verlos.</div>`:'')+`<div class="ocu full" style="grid-column:1/-1;padding:0">
    <div class="ocu-row">${tile('PT EN PISO',f0.format(piso),'Hectolitros')}${tile('PT EN CALIDAD',f0.format(cal),'Hectolitros')}${tile('PT EN BLOQUEO',f0.format(blq),'Hectolitros')}${tile('Ocupación PT piso',f0.format(o1*100)+' %',`Ocupación · ${f0.format(bod)} de ${f0.format(cap)} HL`,'',true,semOcu(o1))}</div>
    <div class="ocu-row r2">${tile('PT EN TRÁNSITO',f0.format(tra),'Hectolitros','y')}${tile('PT EN CALLE',f0.format(calle),'Hectolitros','y')}${tile('Espacio libre',f0.format(Math.max(0,cap-bod)),'Hectolitros disponibles en bodega')}${tile('Ocupación + Tránsitos',f0.format(o2*100)+' %',`Ocupación · ${f0.format(bod+tra)} de ${f0.format(cap)} HL`,'',true,semOcu(o2))}</div>
   </div>
@@ -565,7 +566,7 @@ document.querySelectorAll('#upd input[type=file]').forEach(inp=>inp.onchange=asy
 function msg(t,e){$('msg').textContent=t;$('msg').className=e?'e':''}
 async function preview(){
   if(!files.zexi||!files.prev){$('bPub').disabled=true;msg('Faltan '+[!files.zexi&&'ZEXI_01',!files.prev&&'Preventa'].filter(Boolean).join(' y '));return}
-  if(!MASTER)MASTER=(await (await fetch('master.json',{cache:'no-store'})).json()).items;
+  if(!MASTER)MASTER=(await (await fetch('master.json?v=4',{cache:'no-store'})).json()).items;
   const res=Engine.compute(MASTER,files.zexi,files.tms||[],files.prev,new Date());
   const now=new Date(),pad=n=>String(n).padStart(2,'0');
   res.generado=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
