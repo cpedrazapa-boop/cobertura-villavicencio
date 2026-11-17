@@ -125,29 +125,36 @@ td.b{font-weight:700}
 .mini td:first-child,.mini th:first-child{text-align:left}
 .mini i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
 @media (max-width:900px){.ocu-row,.ocu-row.r2{grid-template-columns:1fr 1fr}}
+.cen{display:flex;gap:6px;margin:8px 0 4px}.cen a{padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-decoration:none;font-weight:600;font-size:13px}.cen a.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.flist{display:grid;gap:6px;margin:10px 0}
+.fitem{display:grid;grid-template-columns:22px 190px 1fr;gap:8px;align-items:start;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.fitem.ok{border-color:var(--grn)}.fitem.warn{border-color:var(--amb)}.fitem.err{border-color:var(--red)}
+.fitem b{font-weight:600}.fitem span{color:var(--mute)}
+#cenTbl table{border-collapse:collapse;font-size:13px;margin:6px 0}#cenTbl td,#cenTbl th{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left;position:static}
+#cenTbl input{font:inherit;width:110px;padding:5px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+.drop.over{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 8%,transparent)}
+.clt td{padding:4px 8px}
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;display:none}
 </style>
 </head>
 <body data-modo="cargar">
 <header>
-  <h1>Cargador · Cobertura de Inventarios Villavicencio</h1><div class="sub"><a href="index.html" style="color:var(--acc)">Ver la página pública →</a></div>
+  <h1 id="h1">Cargador · Cobertura de Inventarios</h1><div class="cen" id="cen"></div><div class="sub"><a id="pubLink" href="index.html" style="color:var(--acc)">Ver la página pública →</a></div>
   <div class="sub"><span id="sub">Cargando…</span><span id="stale"></span></div>
 </header>
 <section id="upd">
   <h3>Actualizar datos para todos</h3>
-  <p>Entra con el correo y la contraseña de cargador y sube los archivos de la semana. La página recalcula la pestaña Data con las mismas fórmulas del Excel y, al publicar, todos los que abran el enlace verán la nueva versión. También puedes subir el libro completo y se toman sus pestañas ZEXI_01, TMS y Preventa.</p>
+  <p>Entra con el correo y la contraseña de cargador y sube los archivos del día tal como salen (con los dos CD). La página calcula la pestaña Data de cada centro con las mismas fórmulas del Excel y, al publicar, se actualizan Villavicencio y Yopal al mismo tiempo.</p>
   <div id="login" class="row" style="margin:0 0 12px">
     <input type="email" id="lEmail" placeholder="Correo" autocomplete="username" style="font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)">
     <input type="password" id="lPass" placeholder="Contraseña" autocomplete="current-password" style="font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)">
     <button class="pri" id="bLogin">Entrar</button>
   </div>
   <div class="drops">
-    <label class="drop" id="dZ"><b>ZEXI_01 *</b><small>Inventario SAP: Material, Ce., Alm., Libre utiliz., In control-cal, Bloqueado</small><input type="file" accept=".xlsx,.xls,.xlsm,.csv" data-k="zexi"></label>
-    <label class="drop" id="dT"><b>TMS</b><small>Archivo TMS (como Libro1): LLAVE, Fecha Arribo, HL. Si no lo subes, TMS queda en 0</small><input type="file" accept=".xlsx,.xls,.xlsm,.csv" data-k="tms"></label>
-    <label class="drop" id="dP"><b>Preventa *</b><small>Bloques "PREVENTA D+1" y "PREVENTA D+3": SKU, CO GC Llanos, CO KA OFF Sur, Total</small><input type="file" accept=".xlsx,.xls,.xlsm,.csv" data-k="prev"></label>
-    <label class="drop" id="dW"><b>…o el libro completo</b><small>Excel con las pestañas ZEXI_01, TMS y Preventa</small><input type="file" accept=".xlsx,.xlsm" data-k="wb"></label>
+    <label class="drop" id="dAll" style="grid-column:1/-1;padding:18px;text-align:center"><b>Arrastra aquí los archivos del día (o haz clic para elegirlos)</b><small>ZEXI de SAP, TMS Shipment Plan (.xlsb), Preventa / surtido (.csv), SL base 1 y base 2, y una vez al mes el pronóstico (FC y ABC). Pueden venir con los dos CD; súbelos todos juntos o uno por uno: el cargador reconoce cada archivo.</small><input type="file" id="fAll" multiple accept=".xlsx,.xls,.xlsm,.xlsb,.csv,.txt,.XLS"></label>
   </div>
-  <div class="row"><label style="color:var(--mute)">Capacidad bodega (HL) <input type="number" id="capIn" min="1" step="1" value="36554" style="font:inherit;width:110px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)"></label></div>
+  <div id="flist" class="flist"></div>
+  <div id="cenTbl"></div>
   <div class="row"><button class="pri" id="bPub" disabled>Publicar para todos</button><button id="bCancel">Cerrar</button><span id="msg"></span></div>
 </section>
 <nav class="tabs" id="tabs">
@@ -180,7 +187,8 @@ td.b{font-weight:700}
 <div id="toast"></div>
 <div id="tip"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="engine.js?v=4"></script>
+<script src="centros.js?v=5"></script>
+<script src="engine.js?v=5"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -213,15 +221,25 @@ function setData(d,info){
   render();
 }
 async function loadStatic(note){
-  try{const d=await (await fetch('data.json',{cache:'no-store'})).json();setData(d,note||'')}catch(e){$('sub').textContent='No se pudieron cargar los datos.'}
+  try{const d=await (await fetch(CEN.data+'?v='+Date.now(),{cache:'no-store'})).json();setData(d,note||'')}catch(e){$('sub').textContent=`${CEN.nombre} todavía no tiene datos publicados.`+(document.body.dataset.modo==='cargar'?' Sube los archivos y publica.':'')}
 }
+let CLIENTES=null;
 async function loadChunks(meta){
   const parts=await Promise.all(Array.from({length:meta.chunks},(_,i)=>getDoc(doc(FB,COL,'c'+i))));
   const all=[];for(const p of parts){const b=p.exists()?p.data():null;if(!b||b.version!==meta.version)return false;all.push(...JSON.parse(b.rows))}
-  setData({columns:meta.columns,rows:all,dia:meta.dia||null,capacidad:meta.capacidad||null,semana:meta.semana,centro:meta.centro,generado:meta.generado},meta.por?'por '+meta.por:'');
+  CLIENTES=null;
+  if(meta.kchunks){try{const ks=await Promise.all(Array.from({length:meta.kchunks},(_,i)=>getDoc(doc(FB,COL,'k'+i))));CLIENTES={};for(const k of ks){const b=k.exists()?k.data():null;if(b&&b.version===meta.version)Object.assign(CLIENTES,JSON.parse(b.data))}}catch(e){CLIENTES=null}}
+  setData({columns:meta.columns,rows:all,d1day:meta.d1day||null,dia:meta.dia||null,capacidad:meta.capacidad||null,semana:meta.semana,centro:meta.centro,generado:meta.generado},meta.por?'por '+meta.por:'');
   return true;
 }
-const COL='cobertura';
+const CENTROS=window.CENTROS||{AV19:{nombre:'Villavicencio',col:'cobertura',master:'master.json',data:'data.json',cap:36554}};
+let CENTRO='AV19';try{const c=(new URLSearchParams(location.search).get('centro')||'').toUpperCase();if(CENTROS[c])CENTRO=c}catch(e){}
+const CEN=CENTROS[CENTRO],PRE=CENTRO.replace(/\D/g,'');
+const COL=CEN.col;
+(function(){const pref=document.body.dataset.modo==='cargar'?'Cargador · ':'';document.title=pref+'Cobertura de Inventarios '+CEN.nombre;$('h1').textContent=pref+'Cobertura de Inventarios · '+CEN.nombre;
+  const page=location.pathname.split('/').pop()||'index.html';
+  $('cen').innerHTML=Object.entries(CENTROS).map(([k,c])=>`<a href="${page}?centro=${k}" class="${k===CENTRO?'on':''}" onclick="this.href=this.href.split('#')[0]+location.hash">${c.nombre} <span style="opacity:.6;font-weight:400">${k}</span></a>`).join('');
+  const pl=document.getElementById('pubLink');if(pl)pl.href='index.html?centro='+CENTRO;})();
 const MODO=document.body.dataset.modo||'ver';
 function configOk(){return firebaseConfig&&firebaseConfig.apiKey&&!/PEGA|TU_/i.test(firebaseConfig.apiKey)}
 async function init(){
@@ -450,7 +468,7 @@ function renderSku(){
        <div style="margin-top:16px;font-size:12px;display:flex;justify-content:space-between"><span>Entregado vs FC acumulado (MTD ${f0.format(fcm)} HL)</span><b class="${semCump(pc)}" style="padding:1px 6px;border-radius:4px">${f0.format(pc*100)} %</b></div>
        <div class="prog"><span style="width:${Math.min(100,pc*100)}%"></span></div>
        <div style="font-size:12px;color:var(--mute)">FC del mes: ${f0.format(fct)} HL · faltan ${f0.format(Math.max(0,fct-ent))} HL · al ritmo actual cierra en ${f0.format(ent/dia*30)} HL (${f0.format(dv(ent/dia*30,fct)*100)} % del FC)</div></div>
-     <div class="card viz full"><h4>¿Quién se lleva este producto?</h4><div class="cs">Clientes que compran este SKU.</div><div class="empty">Pendiente: aquí se verán los clientes que compran este SKU, con sus HL y su participación, cuando se cargue la data de clientes.</div></div>
+     <div class="card viz full"><h4>¿Quién se lleva este producto?</h4><div class="cs">Clientes con pedidos de este SKU en la preventa cargada${D&&D.d1day?' (desde el día '+D.d1day+')':''}.</div>${clientesHtml(SKU)}</div>
      <div class="card full"><h4>Todos los datos del SKU</h4><div class="cs">${esc(r.Marca)} · ${esc(r.Lines)} · ${esc(r.tipo)}</div><div class="kv">${kv.map(([k,v])=>`<div><span>${k}</span><b>${esc(v)}</b></div>`).join('')}</div></div>
     </div>`;
   $('skuIn').onchange=e=>{const m=String(e.target.value).split(' · ')[0].trim();if(rows.some(x=>String(x.Material)===m))openSku(m)};
@@ -459,7 +477,7 @@ function renderSku(){
 }
 
 /* ---------- Ocupación de bodega ---------- */
-const CAP_DEF=36554;
+const CAP_DEF=CEN.cap||0;
 const capacidad=()=>N(D&&D.capacidad)||CAP_DEF;
 const semOcu=v=>'';  // sin semáforo por ahora
 const TIPO_COL={'1. Retornable':'#2b3467','2. Lata':'#a9adc6','3. TW':'#5a9e3a','4. Pet':'#6b6b6b'};
@@ -482,15 +500,16 @@ function tmHtml(items,W){
   return '<div class="tm">'+rects.map(r=>`<div class="${LIGHT.has(r.c)?'lt':''}" style="left:${r.x/W*100}%;top:${r.y}px;width:${r.w/W*100}%;height:${r.h}px;background:${r.c}" data-tip="<b>${esc(r.l)}</b><br>${f0.format(r.v)} HL · ${f1.format(r.v/tot*100)} % de la bodega"><b>${r.w>60&&r.h>26?esc(r.l):''}</b><i>${r.w>50&&r.h>44?f1.format(r.v/tot*100)+'%':''}</i></div>`).join('')+'</div>';
 }
 function miniTable(items,cap){
-  const tot=items.reduce((a,i)=>a+i.v,0)||1;
+  const tot=items.reduce((a,i)=>a+i.v,0)||1;cap=cap||NaN;
   return `<table class="mini"><tr><th></th><th>HL en bodega</th><th>% de la bodega</th><th>% de la capacidad</th><th>SKUs</th></tr>`+
-    items.map(i=>`<tr><td><i style="background:${i.c}"></i>${esc(i.l)}</td><td>${f0.format(i.v)}</td><td>${f1.format(i.v/tot*100)} %</td><td>${f1.format(i.v/cap*100)} %</td><td>${i.n}</td></tr>`).join('')+
-    `<tr><td><b>Total</b></td><td><b>${f0.format(tot)}</b></td><td>100 %</td><td><b>${f1.format(tot/cap*100)} %</b></td><td>${items.reduce((a,i)=>a+i.n,0)}</td></tr></table>`;
+    items.map(i=>`<tr><td><i style="background:${i.c}"></i>${esc(i.l)}</td><td>${f0.format(i.v)}</td><td>${f1.format(i.v/tot*100)} %</td><td>${isNaN(cap)?"—":f1.format(i.v/cap*100)+" %"}</td><td>${i.n}</td></tr>`).join('')+
+    `<tr><td><b>Total</b></td><td><b>${f0.format(tot)}</b></td><td>100 %</td><td><b>${isNaN(cap)?"—":f1.format(tot/cap*100)+" %"}</b></td><td>${items.reduce((a,i)=>a+i.n,0)}</td></tr></table>`;
 }
 function renderOcu(){
   const f=filtered(),cap=capacidad(),s=k=>f.reduce((a,r)=>a+N(r[k]),0);
   const piso=s('Inv. Piso'),cal=s('Inv. Calidad'),blq=s('Inv. Bloqueo'),tra=s('Inv. Transito'),calle=s('Inv. Calle');
-  const bod=piso+cal+blq,o1=bod/cap,o2=(bod+tra)/cap;
+  const bod=piso+cal+blq,o1=cap?bod/cap:NaN,o2=cap?(bod+tra)/cap:NaN;
+  const P=x=>isNaN(x)?'—':f0.format(x*100)+' %';
   const enBod=r=>N(r['Inv. Piso'])+N(r['Inv. Calidad'])+N(r['Inv. Bloqueo']);
   const group=(key,order,colors,def)=>order.map(g=>{const rs=f.filter(r=>(r[key]||def)===g&&enBod(r)>0);return {l:g,v:rs.reduce((a,r)=>a+enBod(r),0),c:colors[g],n:rs.length}}).filter(i=>i.v>0);
   const tipos=group('tipo',Object.keys(TIPO_COL),TIPO_COL,'');
@@ -500,16 +519,24 @@ function renderOcu(){
   $('kpis').innerHTML='';
   const viejo=!cols.includes('Inv. Calidad');
   $('charts').innerHTML=(viejo?`<div class="card full" style="grid-column:1/-1;border-color:var(--amb);background:var(--ambbg);color:var(--amb)"><b>Faltan datos:</b> la última publicación se hizo con una versión anterior del cargador, por eso PT en calidad, bloqueo, calle y la clasificación ABC salen en 0. Vuelve a publicar desde el cargador para verlos.</div>`:'')+`<div class="ocu full" style="grid-column:1/-1;padding:0">
-   <div class="ocu-row">${tile('PT EN PISO',f0.format(piso),'Hectolitros')}${tile('PT EN CALIDAD',f0.format(cal),'Hectolitros')}${tile('PT EN BLOQUEO',f0.format(blq),'Hectolitros')}${tile('Ocupación PT piso',f0.format(o1*100)+' %',`Ocupación · ${f0.format(bod)} de ${f0.format(cap)} HL`,'',true,semOcu(o1))}</div>
-   <div class="ocu-row r2">${tile('PT EN TRÁNSITO',f0.format(tra),'Hectolitros','y')}${tile('PT EN CALLE',f0.format(calle),'Hectolitros','y')}${tile('Espacio libre',f0.format(Math.max(0,cap-bod)),'Hectolitros disponibles en bodega')}${tile('Ocupación + Tránsitos',f0.format(o2*100)+' %',`Ocupación · ${f0.format(bod+tra)} de ${f0.format(cap)} HL`,'',true,semOcu(o2))}</div>
+   <div class="ocu-row">${tile('PT EN PISO',f0.format(piso),'Hectolitros')}${tile('PT EN CALIDAD',f0.format(cal),'Hectolitros')}${tile('PT EN BLOQUEO',f0.format(blq),'Hectolitros')}${tile('Ocupación PT piso',P(o1),cap?`Ocupación · ${f0.format(bod)} de ${f0.format(cap)} HL`:'Falta la capacidad de la bodega (se pone en el cargador)','',true,semOcu(o1))}</div>
+   <div class="ocu-row r2">${tile('PT EN TRÁNSITO',f0.format(tra),'Hectolitros','y')}${tile('PT EN CALLE',f0.format(calle),'Hectolitros','y')}${tile('Espacio libre',cap?f0.format(Math.max(0,cap-bod)):'—','Hectolitros disponibles en bodega')}${tile('Ocupación + Tránsitos',P(o2),cap?`Ocupación · ${f0.format(bod+tra)} de ${f0.format(cap)} HL`:'Falta la capacidad de la bodega','',true,semOcu(o2))}</div>
   </div>
   <div class="card viz"><h4>% Ocupación por tipo de PT</h4><div class="cs">HL en bodega (piso + calidad + bloqueo) por empaque.</div>${tmHtml(tipos,600)}${miniTable(tipos,cap)}</div>
-  <div class="card viz"><h4>% Ocupación por clasificación ABC</h4><div class="cs">Según la pestaña ABC del Excel (A = SKUs de mayor forecast).</div>${tmHtml(abc,600)}${miniTable(abc,cap)}</div>
+  <div class="card viz"><h4>% Ocupación por clasificación ABC</h4><div class="cs">Según el pronóstico del mes: A = SKUs que suman el 80 % del FC, B el siguiente 15 %, C el resto.</div>${tmHtml(abc,600)}${miniTable(abc,cap)}</div>
   <div class="card viz full"><h4>SKUs que más espacio ocupan</h4><div class="cs">Top 12 por HL en bodega. Clic en el nombre para ver la ficha.</div>
    <div class="hb">${top.map(r=>{const v=enBod(r),c=ABC_COL[r.ABC||'Sin clasificar'];return `<div class="lab" data-sku="${esc(r.Material)}">${esc(r.Material)} · ${esc(r.Descripcion)}</div><div class="trk" style="width:${v/mx*100}%"><span style="flex:1;background:${c}" data-tip="<b>${esc(r.Descripcion)}</b><br>${f0.format(v)} HL en bodega · clase ${esc(r.ABC||'sin clasificar')}<br>${f1.format(v/cap*100)} % de la capacidad"></span></div><div class="val">${f0.format(v)} HL · ${esc(r.ABC||'—')}</div>`}).join('')}</div>
    <div class="legend" style="margin-top:10px">${Object.entries(ABC_COL).map(([k,c])=>`<span><i style="background:${c}"></i>${k==='Sin clasificar'?k:'Clase '+k}</span>`).join('')}</div></div>`;
   copyData={h:['Grupo','HL en bodega','SKUs'],r:[...tipos.map(i=>[i.l,Math.round(i.v),i.n]),...abc.map(i=>['Clase '+i.l,Math.round(i.v),i.n])]};
-  $('foot').textContent=`Capacidad de la bodega: ${f0.format(cap)} HL. Ocupación PT piso = (piso + calidad + bloqueo) ÷ capacidad. Ocupación + tránsitos suma el almacén de tránsito (1940). PT en calle = almacén 1941. Con filtros, los valores son solo de los SKUs filtrados.`;
+  $('foot').textContent=`Capacidad de la bodega: ${f0.format(cap)} HL. Ocupación PT piso = (piso + calidad + bloqueo) ÷ capacidad. Ocupación + tránsitos suma el almacén de tránsito (${PRE}40). PT en calle = almacén ${PRE}41. Con filtros, los valores son solo de los SKUs filtrados.`;
+}
+function clientesHtml(sku){
+  if(!CLIENTES)return '<div class="empty">No hay datos de clientes en la última publicación. Se llenan al publicar con la preventa en crudo (archivo de surtido).</div>';
+  const L=CLIENTES[String(sku)];if(!L||!L.length)return '<div class="empty">Este SKU no tiene pedidos en la preventa cargada.</div>';
+  const tot=L.reduce((a,x)=>a+x[1],0),top=L.slice(0,15),mx=top[0][1]||1,t5=L.slice(0,5).reduce((a,x)=>a+x[1],0);
+  return `<div class="legend"><span>${L.length} clientes · ${f1.format(tot)} HL en preventa · los 5 primeros llevan el ${f0.format(dv(t5,tot)*100)} %</span><span><i style="background:var(--tat)"></i>TAT (ZCP1)</span><span><i style="background:var(--ka)"></i>KA (ZCP6)</span></div>
+   <div class="hb">${top.map(([c,hl,docs,tp])=>`<div class="lab" style="cursor:default">Cliente ${esc(c)}</div><div class="trk" style="width:${hl/mx*100}%"><span style="flex:1;background:${tp==='ZCP6'?'var(--ka)':'var(--tat)'}" data-tip="Cliente ${esc(c)}<br>${f1.format(hl)} HL · ${docs} pedido${docs===1?'':'s'} · ${tp==='ZCP6'?'KA':'TAT'}"></span></div><div class="val">${f1.format(hl)} HL · ${f0.format(dv(hl,tot)*100)} %</div>`).join('')}</div>
+   ${L.length>15?`<div class="cs" style="margin-top:8px">Y ${L.length-15} clientes más con ${f1.format(tot-top.reduce((a,x)=>a+x[1],0))} HL.</div>`:''}`;
 }
 function layout(){
   const sku=VIEW==='sku';
@@ -538,56 +565,124 @@ $('bLogin').onclick=async()=>{
 $('lPass').addEventListener('keydown',e=>{if(e.key==='Enter')$('bLogin').click()});
 $('bSalir').onclick=()=>signOut(AUTH);
 $('bCancel').onclick=()=>{$('upd').style.display='none'};
-function readWb(file){return file.arrayBuffer().then(b=>XLSX.read(b,{type:'array',cellDates:true}))}
-const boxes={zexi:'dZ',tms:'dT',prev:'dP',wb:'dW'};
-function mark(k,ok,txt){const el=$(boxes[k]);el.classList.toggle('ok',!!ok);el.classList.toggle('err',ok===false);el.querySelector('small').textContent=txt}
-let pending=null;
-$('capIn').addEventListener('input',()=>{const v=N($('capIn').value);if(v>0&&pending){pending.capacidad=v;D.capacidad=v;render()}});
-document.querySelectorAll('#upd input[type=file]').forEach(inp=>inp.onchange=async()=>{
-  const f=inp.files[0];if(!f)return;const k=inp.dataset.k;
-  try{
-    if(typeof XLSX==='undefined'||typeof Engine==='undefined')throw new Error('No cargó el lector de Excel; recarga la página');
-    const wb=await readWb(f);
-    if(k==='wb'){
-      const z=Engine.parseZexi(Engine.pickSheet(wb,XLSX,['ZEXI_01','ZEXI']).rows);files.zexi=z;mark('zexi',true,`${f.name} · ${z.length} filas`);
-      try{const t=Engine.parseTms(Engine.pickSheet(wb,XLSX,['TMS']).rows);files.tms=t;mark('tms',true,`${f.name} · ${t.length} filas`)}catch(e){files.tms=[];mark('tms',null,'Sin TMS en el libro: queda en 0')}
-      const p=Engine.parsePreventa(Engine.pickSheet(wb,XLSX,['Preventa']).rows);files.prev=p;mark('prev',true,`${f.name} · ${Object.keys(p.d1).length} SKUs D+1, ${Object.keys(p.d3).length} D+3`);
-      mark('wb',true,f.name);
-    }else{
-      const names={zexi:['ZEXI_01','ZEXI'],tms:['TMS'],prev:['Preventa']}[k];
-      const rowsX=Engine.pickSheet(wb,XLSX,names).rows;
-      if(k==='zexi'){files.zexi=Engine.parseZexi(rowsX);mark(k,true,`${f.name} · ${files.zexi.length} filas`)}
-      if(k==='tms'){files.tms=Engine.parseTms(rowsX);mark(k,true,`${f.name} · ${files.tms.length} filas`)}
-      if(k==='prev'){files.prev=Engine.parsePreventa(rowsX);mark(k,true,`${f.name} · ${Object.keys(files.prev.d1).length} SKUs D+1, ${Object.keys(files.prev.d3).length} D+3`)}
-    }
-    await preview();
-  }catch(e){mark(k,false,e.message);msg(e.message,true)}
-});
 function msg(t,e){$('msg').textContent=t;$('msg').className=e?'e':''}
+/* Lee cualquier archivo: texto de SAP (UTF-16, tabulado), CSV, Excel o .xlsb (solo la hoja "Data TMS" si existe) */
+async function readFileRows(file){
+  const buf=await file.arrayBuffer(),b=new Uint8Array(buf);
+  const isZip=b[0]===0x50&&b[1]===0x4b,isOle=b[0]===0xd0&&b[1]===0xcf;
+  if(!isZip&&!isOle){
+    const txt=(b[0]===0xff&&b[1]===0xfe)?new TextDecoder('utf-16le').decode(b):new TextDecoder('utf-8').decode(b);
+    const lines=txt.replace(/^﻿/,'').split(/\r?\n/),first=lines.slice(0,12).join('\n');
+    const cnt=c=>(first.split(c).length-1),d=cnt('\t')>cnt(',')&&cnt('\t')>cnt(';')?'\t':(cnt(';')>cnt(',')?';':',');
+    const rows=lines.map(l=>l.split(d).map(v=>{v=v.replace(/^"|"$/g,'');return d===','&&/^-?\d+(\.\d+)?$/.test(v.trim())?Number(v):v}));
+    return [{name:file.name,rows}];
+  }
+  const names=XLSX.read(buf,{type:'array',bookSheets:true}).SheetNames;
+  const want=names.filter(n=>/^data tms$/i.test(n.trim()));
+  const wb=XLSX.read(buf,{type:'array',cellDates:true,dense:true,...(want.length?{sheets:want}:{})});
+  return wb.SheetNames.filter(n=>wb.Sheets[n]).map(n=>({name:n,rows:XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:null})}));
+}
+const TIPOS={zexi:'ZEXI · inventario',tms:'TMS',prev:'Preventa',sl1:'SL base 1 · solicitado',sl2:'SL base 2 · entregado por canal',fc:'Pronóstico del mes · FC y ABC'};
+const CODS=Object.keys(CENTROS);
+const nomC=c=>(CENTROS[c]&&CENTROS[c].nombre)||c;
+const extras=[];
+function parseTipo(k,rows){
+  if(k==='zexi'){const d=Engine.parseZexi(rows),cs=[...new Set(d.map(z=>z.ce))].filter(c=>CENTROS[c]);if(!cs.length)throw new Error('no trae ninguno de los centros configurados ('+CODS.join(', ')+')');return {data:d,info:`${d.length} filas · ${cs.map(nomC).join(' y ')}`}}
+  if(k==='tms'){const d=Engine.parseTms(rows,CODS),by={};d.forEach(t=>{const c=CODS.find(c=>t.llave.endsWith(c));by[c]=(by[c]||0)+t.hl});return {data:d,info:d.length?CODS.filter(c=>by[c]).map(c=>`${nomC(c)}: ${f0.format(by[c])} HL`).join(' · ')+` (${d.length} envíos de PT)`:'sin envíos de PT para estos centros: TMS queda en 0'}}
+  if(k==='prev'){const d=Engine.parsePreventa(rows,new Date());if(d['*'])return {data:d,info:'formato del Excel (un solo centro: '+nomC(CENTRO)+')'};
+    return {data:d,info:Object.entries(d).filter(([c])=>CENTROS[c]).map(([c,p])=>`${nomC(c)}: D+1 = día ${p.d1day}, D+3 = días ${p.dias[0]} a ${p.dias[p.dias.length-1]}, ${Object.keys(p.clientes).length} SKUs`).join(' · ')}}
+  if(k==='fc'){const d=Engine.parseFC(rows);return {data:d,info:`mes ${d.mes||'?'}, semanas ${d.semanas.join(', ')} · `+Object.keys(d.fc).filter(c=>CENTROS[c]).map(c=>{const v=Object.values(d.fc[c]);return `${nomC(c)}: ${f0.format(v.reduce((a,x)=>a+x.fc,0))} HL, A=${v.filter(x=>x.abc==='A').length} B=${v.filter(x=>x.abc==='B').length} C=${v.filter(x=>x.abc==='C').length}`}).join(' · ')+'. Se guarda al publicar y se usa hasta que subas el del próximo mes.'}}
+  if(k==='sl1'){const d=Engine.parseSL(rows);return {data:d,info:Object.keys(d.sol).filter(c=>CENTROS[c]).map(c=>`${nomC(c)}: ${Object.keys(d.sol[c]).length} SKUs`).join(' · ')}}
+  if(k==='sl2'){const d=Engine.parseSL(rows);if(d.combinado)return {data:d,warn:true,info:'trae los dos CD sumados (no tiene la columna Codigo Centro). No la uso: las entregas por canal quedan con los valores anteriores. Descárgala con Codigo Centro en las filas, o una por cada CD.'};
+    return {data:d,info:Object.keys(d.canal).filter(c=>CENTROS[c]).map(c=>`${nomC(c)}: ${Object.keys(d.canal[c]).length} SKUs`).join(' · ')}}
+}
+function renderFiles(){
+  const order=['zexi','tms','prev','sl1','sl2','fc'];
+  $('flist').innerHTML=order.map(k=>{const f=files[k];const need=k==='zexi'||k==='prev';
+    if(!f&&k==='fc'){const g=Object.entries(FC_GUARDADO).filter(([c])=>CENTROS[c]);
+      return `<div class="fitem ${g.length?'ok':''}"><span>${g.length?'✓':'–'}</span><b>${TIPOS[k]} (mensual)</b><span>${g.length?'Usando el guardado: '+g.map(([c,x])=>`${nomC(c)} mes ${x.mes||'?'} (cargado ${esc(x.cargado||'')})`).join(' · ')+'. Súbelo solo cuando cambie el mes.':'No hay pronóstico guardado: Villavicencio usa el FC del Excel y Yopal queda sin FC. Súbelo una vez al mes.'}</span></div>`}
+    if(!f)return `<div class="fitem ${need?'err':''}"><span>${need?'✗':'–'}</span><b>${TIPOS[k]}</b><span>${need?'Falta (obligatorio)':'No cargado (opcional)'}</span></div>`;
+    return `<div class="fitem ${f.warn?'warn':'ok'}"><span>${f.warn?'!':'✓'}</span><b>${TIPOS[k]}</b><span>${esc(f.name)} — ${esc(f.info)}</span></div>`}).join('')+
+    extras.map(x=>`<div class="fitem err"><span>✗</span><b>${esc(x.name)}</b><span>${esc(x.info)}</span></div>`).join('');
+}
+async function addFiles(list){
+  if(typeof XLSX==='undefined'||typeof Engine==='undefined'){msg('No cargó el lector de Excel; recarga la página',true);return}
+  extras.length=0;
+  for(const f of list){
+    msg('Leyendo '+f.name+'…');
+    try{
+      const sheets=await readFileRows(f);let found=0;
+      for(const sh of sheets){const k=Engine.classify(sh.rows);if(!k)continue;
+        try{const r=parseTipo(k,sh.rows);files[k]={name:f.name+(sheets.length>1?' › '+sh.name:''),...r};found++}catch(e){extras.push({name:f.name,info:TIPOS[k]+': '+e.message})}}
+      if(!found&&!extras.some(x=>x.name===f.name))extras.push({name:f.name,info:'No lo reconocí: no se parece a ZEXI, TMS, Preventa ni SL'});
+    }catch(e){extras.push({name:f.name,info:'No se pudo leer ('+e.message+')'})}
+  }
+  renderFiles();await preview();
+}
+$('fAll').onchange=e=>{addFiles([...e.target.files]);e.target.value=''};
+const dz=$('dAll');['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('over')}));
+['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('over')}));
+dz.addEventListener('drop',e=>addFiles([...e.dataTransfer.files]));
+let pending=null,FC_GUARDADO={};
+async function cargarFCGuardado(){
+  if(!FB)return;
+  for(const c of CODS){try{const d=await getDoc(doc(FB,CENTROS[c].col,'fc'));if(d.exists()){const b=d.data();FC_GUARDADO[c]={mes:b.mes,cargado:b.cargado,fc:JSON.parse(b.data)}}}catch(e){}}
+  renderFiles();
+}
+function renderCen(){
+  $('cenTbl').innerHTML='<table><tr><th>Centro</th><th>Capacidad bodega (HL)</th><th>Estado</th></tr>'+CODS.map(c=>{const r=pending&&pending[c];
+    return `<tr><td><b>${esc(nomC(c))}</b> <span style="color:var(--mute)">${c}</span></td><td><input type="number" min="1" step="1" ${c===CENTRO?'id="capIn"':''} data-cap="${c}" value="${r&&r.capacidad?r.capacidad:(c===CENTRO&&D&&D.capacidad?D.capacidad:(CENTROS[c].cap||''))}"></td><td>${r?`listo para publicar · ${r.stats.skusConZexi} SKUs encontrados en el ZEXI`:'<span style="color:var(--mute)">sin datos en los archivos</span>'}</td></tr>`}).join('')+'</table>';
+  $('cenTbl').querySelectorAll('input[data-cap]').forEach(i=>i.oninput=()=>{const v=N(i.value),c=i.dataset.cap;if(pending&&pending[c]&&v>0){pending[c].capacidad=v;if(c===CENTRO){D.capacidad=v;render()}}});
+}
+renderFiles();renderCen();setTimeout(cargarFCGuardado,1500);
 async function preview(){
-  if(!files.zexi||!files.prev){$('bPub').disabled=true;msg('Faltan '+[!files.zexi&&'ZEXI_01',!files.prev&&'Preventa'].filter(Boolean).join(' y '));return}
-  if(!MASTER)MASTER=(await (await fetch('master.json?v=4',{cache:'no-store'})).json()).items;
-  const res=Engine.compute(MASTER,files.zexi,files.tms||[],files.prev,new Date());
-  const now=new Date(),pad=n=>String(n).padStart(2,'0');
-  res.generado=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
-  res.capacidad=N($('capIn').value)||capacidad();
-  pending=res;setData(res,'vista previa sin publicar');$('stale').innerHTML='<span class="badge">Vista previa</span>';
-  msg(`Listo: ${res.stats.skusConZexi} de ${res.rows.length} SKUs encontrados en ZEXI_01. Revisa la tabla y publica.`);
+  if(!files.zexi||!files.prev){$('bPub').disabled=true;msg('Faltan '+[!files.zexi&&'ZEXI',!files.prev&&'Preventa'].filter(Boolean).join(' y ')+'.',true);return}
+  if(!MASTER)MASTER=(await (await fetch(CEN.master+'?v='+Date.now(),{cache:'no-store'})).json()).items;
+  const today=new Date(),prev=files.prev.data,solo='*' in prev;
+  const now=new Date(),pad=n=>String(n).padStart(2,'0'),gen=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const cs=CODS.filter(c=>files.zexi.data.some(z=>z.ce===c)).filter(c=>!solo||c===CENTRO);
+  const out={};
+  for(const c of cs){
+    const sl=files.sl1&&files.sl1.data.sol?files.sl1.data.sol[c]||null:null;
+    const canal=files.sl2&&files.sl2.data.canal?files.sl2.data.canal[c]||null:null;
+    const fc=files.fc?(files.fc.data.fc[c]||null):(FC_GUARDADO[c]?FC_GUARDADO[c].fc:null);
+    const r=Engine.compute(MASTER,files.zexi.data,files.tms?files.tms.data:[],prev,today,c,{sl,canal,fc});
+    r.generado=gen;const inp=document.querySelector(`#cenTbl input[data-cap="${c}"]`);r.capacidad=N(inp&&inp.value)||CENTROS[c].cap||null;
+    out[c]=r;
+  }
+  pending=Object.keys(out).length?out:null;renderCen();
+  if(!pending){$('bPub').disabled=true;msg('El ZEXI no trae inventario de ningún centro configurado.',true);return}
+  if(pending[CENTRO]){CLIENTES=pending[CENTRO].clientes||null;setData(pending[CENTRO],'vista previa sin publicar');$('stale').innerHTML='<span class="badge">Vista previa</span>'}
+  msg(`Listo para publicar: ${Object.keys(pending).map(nomC).join(' y ')}. Estás viendo ${nomC(CENTRO)}; revisa y publica.`+(solo?' (Preventa en formato del Excel: solo se publica este centro.)':''));
   $('bPub').disabled=!(FB&&puedeEditar());
   if(!FB)msg('Vista previa local: falta configurar Firebase para poder publicar.',true);
   else if(!USER)msg('Entra con tu correo y contraseña para publicar.',true);
   else if(!puedeEditar())msg('Tu correo no está autorizado para publicar.',true);
 }
+function chunkClientes(cl){
+  const out=[];let cur={},size=0;
+  for(const sku in (cl||{})){const v=cl[sku].slice(0,60),s=JSON.stringify(v).length;if(size+s>250000&&size){out.push(cur);cur={};size=0}cur[sku]=v;size+=s}
+  if(size)out.push(cur);return out;
+}
 $('bPub').onclick=async()=>{
   if(!pending||!FB||!puedeEditar())return;$('bPub').disabled=true;msg('Publicando…');
-  try{
-    const version=Date.now().toString(36),size=150,n=Math.ceil(pending.rows.length/size);
-    const batch=writeBatch(FB);
-    for(let i=0;i<n;i++)batch.set(doc(FB,COL,'c'+i),{version,rows:JSON.stringify(pending.rows.slice(i*size,(i+1)*size))});
-    batch.set(doc(FB,COL,'meta'),{version,chunks:n,dia:pending.dia||null,capacidad:pending.capacidad||null,columns:pending.columns,semana:pending.semana,centro:pending.centro,generado:pending.generado,por:USER.displayName||USER.email,stats:pending.stats});
-    await batch.commit();
-    curVersion=null;msg('Publicado. Todos ven ahora esta versión.');toast('Publicado para todos');$('stale').innerHTML='';
-  }catch(e){msg(e&&e.code==='permission-denied'?'Firebase rechazó la escritura: tu correo no está en las reglas de Firestore.':'No se pudo publicar ('+(e.code||e.message||e)+')',true);$('bPub').disabled=false}
+  const ok=[],bad=[];
+  for(const c of Object.keys(pending)){
+    const P=pending[c],col=CENTROS[c].col;
+    try{
+      const version=Date.now().toString(36),size=150,n=Math.ceil(P.rows.length/size),kc=chunkClientes(P.clientes);
+      const batch=writeBatch(FB);
+      for(let i=0;i<n;i++)batch.set(doc(FB,col,'c'+i),{version,rows:JSON.stringify(P.rows.slice(i*size,(i+1)*size))});
+      kc.forEach((k,i)=>batch.set(doc(FB,col,'k'+i),{version,data:JSON.stringify(k)}));
+      if(files.fc&&files.fc.data.fc[c])batch.set(doc(FB,col,'fc'),{mes:files.fc.data.mes||null,cargado:P.generado,data:JSON.stringify(files.fc.data.fc[c])});
+      batch.set(doc(FB,col,'meta'),{version,chunks:n,kchunks:kc.length,d1day:P.d1day||null,dia:P.dia||null,capacidad:P.capacidad||null,columns:P.columns,semana:P.semana,centro:c,generado:P.generado,por:USER.displayName||USER.email,stats:P.stats});
+      await batch.commit();ok.push(nomC(c));
+    }catch(e){bad.push(nomC(c)+(e&&e.code==='permission-denied'?' (Firebase no dejó guardar: revisa que las reglas incluyan '+col+')':' ('+(e.code||e.message||e)+')'))}
+  }
+  curVersion=null;
+  if(files.fc)for(const c of Object.keys(pending))if(files.fc.data.fc[c])FC_GUARDADO[c]={mes:files.fc.data.mes,cargado:pending[c].generado,fc:files.fc.data.fc[c]};
+  if(bad.length){msg((ok.length?'Publicado: '+ok.join(' y ')+'. ':'')+'No se pudo publicar: '+bad.join('; '),true);$('bPub').disabled=false}
+  else{msg('Publicado: '+ok.join(' y ')+'. Todos ven ahora esta versión.');toast('Publicado para todos');$('stale').innerHTML=''}
 };
 init();
 </script>

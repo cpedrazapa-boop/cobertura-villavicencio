@@ -1,13 +1,14 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Datos de la página de cobertura
-    match /cobertura/{docId} {
+    // Datos de cada centro: cobertura (Villavicencio AV19), cobertura_AV24 (Yopal)
+    match /{col}/{docId} {
       // Cualquiera con el enlace puede ver los datos
-      allow read: if true;
+      allow read: if col in ['cobertura', 'cobertura_AV24'];
       // Solo estos correos pueden publicar (los mismos de firebase-config.js)
-      allow write: if request.auth != null
-                   && request.auth.token.email in ['tu-correo@gmail.com'];
+      allow write: if col in ['cobertura', 'cobertura_AV24']
+                   && request.auth != null
+                   && request.auth.token.email in ['cpedrazapa@gmail.com'];
     }
   }
 }
