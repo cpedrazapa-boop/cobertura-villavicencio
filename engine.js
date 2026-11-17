@@ -1,7 +1,7 @@
 /* Motor de cálculo: replica las fórmulas de la pestaña "Data" del Excel
    Cobertura Inventarios Villavicencio a partir de ZEXI_01, TMS y Preventa. */
 (function (root) {
-  const COLUMNS = ['Llave','Semana','Tipo PT','Marca','Lines','Centro','Material','Descripcion','UM','Existencia','Cant entrega Pendien','Total Disponible','Cantidad en Pedidos','Inv. Final','tipo','presentacio','conte','Inv. Piso','Inv. Reservado','Venta Total','Preventa Hl','Venta tat','Venta Ka','Inv. Transito','Stock out','FC Dia','Dias cobertura','Stock Seguridad HL','Stock Seguridad DC','TMS','Fecha Arribo TMS','Fecha Prox Prod','Planta','Htls Prod Plan','Riesgo HL','Riesgo DC','FC TOTAL CD','FC MES','Volumen Entregado','Forescast KA','Forescaste TAT','FC MTD KA','Volumen Solicitado','%Cumpl. Ventas','Volumen recibido2','%Cumpl. T1','Venta W+1','Cumpl. CD','Cumpl. Ventas','Entregado TAT','Entregado KA','Entregado Socios','DC TMS','DC BODEGA','DC PREVENTA','DC TRANSITOS','VENTA D+3','PRD 1.5 EST','PRD 1,5 PQ'];
+  const COLUMNS = ['Llave','Semana','Tipo PT','Marca','Lines','Centro','Material','Descripcion','UM','Existencia','Cant entrega Pendien','Total Disponible','Cantidad en Pedidos','Inv. Final','tipo','presentacio','conte','Inv. Piso','Inv. Reservado','Venta Total','Preventa Hl','Venta tat','Venta Ka','Inv. Transito','Stock out','FC Dia','Dias cobertura','Stock Seguridad HL','Stock Seguridad DC','TMS','Fecha Arribo TMS','Fecha Prox Prod','Planta','Htls Prod Plan','Riesgo HL','Riesgo DC','FC TOTAL CD','FC MES','Volumen Entregado','Forescast KA','Forescaste TAT','FC MTD KA','Volumen Solicitado','%Cumpl. Ventas','Volumen recibido2','%Cumpl. T1','Venta W+1','Cumpl. CD','Cumpl. Ventas','Entregado TAT','Entregado KA','Entregado Socios','DC TMS','DC BODEGA','DC PREVENTA','DC TRANSITOS','VENTA D+3','PRD 1.5 EST','PRD 1,5 PQ','Inv. Calidad','Inv. Bloqueo','Inv. Calle','ABC'];
 
   const norm = s => String(s == null ? '' : s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
   const num = v => { if (v == null || v === '') return 0; if (typeof v === 'number') return v; const n = parseFloat(String(v).replace(/\s/g, '').replace(/\.(?=\d{3}(\D|$))/g, '').replace(',', '.')); return isNaN(n) ? 0 : n; };
@@ -129,6 +129,9 @@
       const V = p1.tat || 0, W = p1.ka || 0, AV = p1.total || 0, BG = p3.total || 0;
       const zT = zByKey[llave + '1940'];
       const X = zT ? (zT.libre + zT.ctrl + zT.bloq) * Q / 1e5 : 0;
+      const zC = zByKey[llave + '1941'];
+      const CAL = zA ? zA.ctrl * Q / 1e5 : 0, BLQ = zA ? zA.bloq * Q / 1e5 : 0;
+      const CALLE = zC ? (zC.libre + zC.ctrl + zC.bloq) * Q / 1e5 : 0;
       const AL = num(m['FC TOTAL CD']), AM = AL * BJ;
       const Z = div(AM, day);
       const zF = zFirstByMat[mat];
@@ -152,12 +155,13 @@
         'Forescaste TAT': Math.max(0, AM - AO), 'FC MTD KA': AO * BJ, 'Volumen Solicitado': AR, '%Cumpl. Ventas': div(AR, AM),
         'Volumen recibido2': AT, '%Cumpl. T1': div(AT, AM), 'Venta W+1': AV, 'Cumpl. CD': div(AN, AM), 'Cumpl. Ventas': div(AR, AM),
         'Entregado TAT': AY, 'Entregado KA': AZ, 'Entregado Socios': BB, 'DC TMS': div(AD, Z), 'DC BODEGA': div(R, Z), 'DC PREVENTA': div(AV, Z),
-        'DC TRANSITOS': div(X, Z), 'VENTA D+3': BG, 'PRD 1.5 EST': BH, 'PRD 1,5 PQ': BH * cj
+        'DC TRANSITOS': div(X, Z), 'VENTA D+3': BG, 'PRD 1.5 EST': BH, 'PRD 1,5 PQ': BH * cj,
+        'Inv. Calidad': CAL, 'Inv. Bloqueo': BLQ, 'Inv. Calle': CALLE, 'ABC': m.ABC || ''
       };
       return COLUMNS.map(c => { const x = v[c]; return typeof x === 'number' ? Math.round(x * 100) / 100 : (x == null ? null : x); });
     });
     const matched = master.filter(m => zByKey[key(m.Material) + key(m.Centro || 'AV19') + '1901']).length;
-    return { columns: COLUMNS, rows, semana, centro: master[0] ? master[0].Centro : 'AV19', stats: { zexi: zexiRows.length, tms: tmsRows.length, prevD1: Object.keys(prev.d1).length, prevD3: Object.keys(prev.d3).length, skusConZexi: matched } };
+    return { columns: COLUMNS, rows, dia: day, semana, centro: master[0] ? master[0].Centro : 'AV19', stats: { zexi: zexiRows.length, tms: tmsRows.length, prevD1: Object.keys(prev.d1).length, prevD3: Object.keys(prev.d3).length, skusConZexi: matched } };
   }
 
   /* Elige la hoja correcta dentro de un libro (por nombre, o la primera) */

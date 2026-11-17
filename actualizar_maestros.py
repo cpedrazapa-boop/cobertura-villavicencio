@@ -13,6 +13,10 @@ def clean(v):
     if isinstance(v,str) and v.startswith('#'): return None
     if hasattr(v,'isoformat'): return str(v)[:10]
     return v
+abc={}
+if 'ABC' in wb.sheetnames:
+    for r in wb['ABC'].iter_rows(min_row=2,values_only=True):
+        if r[0] is not None and r[5]: abc[r[0]]=str(r[5]).strip().upper()
 items=[]
 for r in it:
     if r[idx['Material']] is None: continue
@@ -20,7 +24,7 @@ for r in it:
     for c in ['Marca','Lines','UM','tipo','Tipo PT']:
         v=o[c]; o[c]='' if (v in (None,0)) else str(v).strip()
     o['UM']=o['UM'].upper(); o['tipo']=o['tipo'].replace('Tw','TW').replace('pet','Pet')
-    c3,d4=bd.get(o['Material'],(None,None)); o['_cjEst']=c3; o['_undEst']=d4
+    c3,d4=bd.get(o['Material'],(None,None)); o['_cjEst']=c3; o['_undEst']=d4; o['ABC']=abc.get(o['Material'],'')
     items.append(o)
 json.dump({'items':items},open(sys.argv[2],'w'),ensure_ascii=False,separators=(',',':'))
 print(len(items))

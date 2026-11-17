@@ -59,6 +59,72 @@ table.v th{background:#f2c200;color:#1b1f24;top:33px;white-space:normal;vertical
 td.c-r{background:#f8c9c4;color:#7a1d15}td.c-y{background:#fbe7a1;color:#6b4e00}td.c-g{background:#bfe6c9;color:#14532d}
 @media (prefers-color-scheme:dark){td.c-r{background:#5a2420;color:#ffb4ab}td.c-y{background:#4d3d10;color:#ffd970}td.c-g{background:#1d3d27;color:#9fe0b4}}
 td.b{font-weight:700}
+
+/* ---- visuales ---- */
+.viz{--ka:#2a78d6;--tat:#eb6834;--soc:#1baf7a;--pos:#2a78d6;--neg:#eb6834;--grid:#e9ebef}
+@media (prefers-color-scheme:dark){.viz{--ka:#3987e5;--tat:#d95926;--soc:#199e70;--pos:#3987e5;--neg:#d95926;--grid:#2c323a}}
+#charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(460px,1fr));gap:12px;padding:4px 24px 8px}
+#charts:empty{display:none}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.card h4{margin:0 0 2px;font-size:14px}.card .cs{color:var(--mute);font-size:12px;margin-bottom:10px}
+.card.full{grid-column:1/-1}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mute);margin-bottom:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.hb{display:grid;grid-template-columns:minmax(120px,210px) 1fr auto;gap:4px 10px;align-items:center;font-size:12px}
+.hb .lab{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink);cursor:pointer}
+.hb .lab:hover{color:var(--acc);text-decoration:underline}
+.hb .trk{height:16px;display:flex;gap:2px}
+.hb .trk span{display:block;height:100%;min-width:1px}
+.hb .trk span:last-child{border-radius:0 4px 4px 0}
+.hb .val{font-variant-numeric:tabular-nums;color:var(--mute);text-align:right;white-space:nowrap}
+.stk{display:flex;height:26px;gap:2px;border-radius:4px;overflow:hidden;margin:4px 0 2px}
+.stk span{display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden}
+.stkrow{display:grid;grid-template-columns:150px 1fr;gap:10px;align-items:center;font-size:12px;margin-bottom:6px}
+#tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;padding:6px 9px;border-radius:6px;display:none;z-index:50;max-width:280px;line-height:1.4}
+#tbl tbody tr[data-m]{cursor:pointer}
+/* ficha */
+#ficha{display:none;padding:0 24px 16px}
+.fhead{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0 12px}
+.fhead input{font:inherit;padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);min-width:360px}
+.ftitle{font-size:18px;font-weight:700}
+.chip{display:inline-block;padding:2px 9px;border-radius:99px;background:var(--bg);border:1px solid var(--line);font-size:12px;color:var(--mute);margin-right:4px}
+.fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}@media (max-width:900px){.fgrid{grid-template-columns:1fr}}
+.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:0 18px;font-size:12px}
+.kv div{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:5px 0;gap:8px}
+.kv span{color:var(--mute)}.kv b{font-weight:600;font-variant-numeric:tabular-nums}
+.div{display:grid;grid-template-columns:150px 1fr 90px;gap:4px 10px;align-items:center;font-size:12px}
+.div .ax{position:relative;height:18px}
+.div .ax:before{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--mute)}
+.div .ax span{position:absolute;top:1px;height:16px}
+.div .v{text-align:right;font-variant-numeric:tabular-nums}
+.div .res{font-weight:700}
+.prog{height:14px;background:var(--grid);border-radius:4px;position:relative;margin:6px 0}
+.prog span{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--pos)}
+.empty{border:1.5px dashed var(--line);border-radius:10px;padding:18px;color:var(--mute);text-align:center}
+.kpi .s{font-size:12px;color:var(--mute);margin-top:2px}
+
+/* ---- ocupación ---- */
+.ocu{padding:4px 24px 8px;display:grid;gap:12px}
+.ocu-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) minmax(0,1.1fr);gap:12px}
+.ocu-row.r2{grid-template-columns:repeat(2,minmax(0,1fr)) minmax(0,1fr) minmax(0,1.1fr)}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;text-align:center}
+.tile .h{background:#4b4f56;color:#fff;font-weight:700;font-size:12px;padding:6px;letter-spacing:.03em}
+.tile.y .h{background:#f2c200;color:#1b1f24}
+.tile .n{font-size:34px;font-weight:600;padding:8px 6px 0;font-variant-numeric:tabular-nums}
+.tile .u{color:var(--mute);font-size:13px;padding-bottom:10px}
+.tile.big .n{font-size:40px}
+.tile .n.r{color:var(--red)}.tile .n.a{color:var(--amb)}.tile .n.g{color:var(--grn)}
+.tm{position:relative;height:300px;margin-top:6px}
+.tm div{position:absolute;box-sizing:border-box;border:1px solid var(--card);padding:8px 10px;color:#fff;font-size:14px;overflow:hidden}
+.tm div b{font-weight:500;display:block}
+.tm div i{position:absolute;left:10px;bottom:8px;font-style:normal;font-size:13px}
+.tm div.lt{color:#1b1f24}
+.mini{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+.mini td,.mini th{padding:5px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.mini th{color:var(--mute);font-weight:600;position:static;cursor:default}
+.mini td:first-child,.mini th:first-child{text-align:left}
+.mini i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+@media (max-width:900px){.ocu-row,.ocu-row.r2{grid-template-columns:1fr 1fr}}
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;display:none}
 </style>
 </head>
@@ -81,12 +147,16 @@ td.b{font-weight:700}
     <label class="drop" id="dP"><b>Preventa *</b><small>Bloques "PREVENTA D+1" y "PREVENTA D+3": SKU, CO GC Llanos, CO KA OFF Sur, Total</small><input type="file" accept=".xlsx,.xls,.xlsm,.csv" data-k="prev"></label>
     <label class="drop" id="dW"><b>…o el libro completo</b><small>Excel con las pestañas ZEXI_01, TMS y Preventa</small><input type="file" accept=".xlsx,.xlsm" data-k="wb"></label>
   </div>
+  <div class="row"><label style="color:var(--mute)">Capacidad bodega (HL) <input type="number" id="capIn" min="1" step="1" value="36554" style="font:inherit;width:110px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)"></label></div>
   <div class="row"><button class="pri" id="bPub" disabled>Publicar para todos</button><button id="bCancel">Cerrar</button><span id="msg"></span></div>
 </section>
 <nav class="tabs" id="tabs">
-  <button data-v="d1" class="on">Cobertura D+1 (Tránsitos)</button>
+  <button data-v="ocu">Ocupación bodega</button>
+  <button data-v="d1">Cobertura D+1 (Tránsitos)</button>
   <button data-v="d3">Cobertura D+3</button>
   <button data-v="canal">Volumen entregado x canal</button>
+  <button data-v="rot">Rotación por SKU</button>
+  <button data-v="sku">Detalle por SKU</button>
   <button data-v="data">Tabla completa</button>
 </nav>
 <section class="kpis" id="kpis"></section>
@@ -103,9 +173,12 @@ td.b{font-weight:700}
   <span id="who" style="color:var(--mute);font-size:12px"></span><button id="bSalir" style="display:none">Salir</button>
 </div>
 <div id="cols"></div>
+<section id="charts"></section>
+<section id="ficha"></section>
 <div class="wrap"><table id="tbl"><thead></thead><tbody></tbody></table></div>
 <div class="foot" id="foot"></div>
 <div id="toast"></div>
+<div id="tip"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="engine.js"></script>
 <script type="module">
@@ -128,6 +201,7 @@ function estado(r){
 const pill={'Stock out':'p-r','Bajo SS':'p-a','OK':'p-g','Sin venta':'p-n'};
 let MASTER=null,firstLoad=true,curVersion=null,FB=null,AUTH=null,USER=null;
 function setData(d,info){
+  try{if($('capIn')&&d.capacidad&&!pending)$('capIn').value=d.capacidad}catch(e){}
   D=d;cols=d.columns;
   rows=d.rows.map(a=>{const o={};cols.forEach((c,i)=>o[c]=a[i]);o.Estado=estado(o);return o});
   if(firstLoad){
@@ -144,7 +218,7 @@ async function loadStatic(note){
 async function loadChunks(meta){
   const parts=await Promise.all(Array.from({length:meta.chunks},(_,i)=>getDoc(doc(FB,COL,'c'+i))));
   const all=[];for(const p of parts){const b=p.exists()?p.data():null;if(!b||b.version!==meta.version)return false;all.push(...JSON.parse(b.rows))}
-  setData({columns:meta.columns,rows:all,semana:meta.semana,centro:meta.centro,generado:meta.generado},meta.por?'por '+meta.por:'');
+  setData({columns:meta.columns,rows:all,dia:meta.dia||null,capacidad:meta.capacidad||null,semana:meta.semana,centro:meta.centro,generado:meta.generado},meta.por?'por '+meta.por:'');
   return true;
 }
 const COL='cobertura';
@@ -193,7 +267,7 @@ function renderData(){
   shown=f;copyData={h:ord,r:f.map(r=>ord.map(c=>r[c]??''))};
   $('tbl').tHead.innerHTML='<tr>'+ord.map(c=>`<th class="${TEXT_COLS.has(c)||c==='Estado'?'t':''}" data-k="${c}">${c}${sortK===c?(sortDir>0?' ▲':' ▼'):''}</th>`).join('')+'</tr>';
   $('tbl').tHead.querySelectorAll('th').forEach(th=>th.onclick=()=>{const k=th.dataset.k;if(sortK===k)sortDir*=-1;else{sortK=k;sortDir=1}render()});
-  $('tbl').tBodies[0].innerHTML=f.map(r=>'<tr>'+ord.map(c=>{
+  $('tbl').tBodies[0].innerHTML=f.map(r=>`<tr data-m="${esc(r.Material)}">`+ord.map(c=>{
     const v=r[c];
     if(c==='Estado')return `<td class="t"><span class="pill ${pill[v]}">${v}</span></td>`;
     if(TEXT_COLS.has(c)||typeof v!=='number')return `<td class="t${c==='Descripcion'?' desc':''}" title="${v??''}">${v??''}</td>`;
@@ -212,8 +286,8 @@ function renderData(){
 }
 
 /* ---------- Vistas ---------- */
-let VIEW='d1',copyData={h:[],r:[]};
-try{const h=location.hash.slice(1);if(['d1','d3','canal','data'].includes(h))VIEW=h}catch(e){}
+let VIEW='ocu',copyData={h:[],r:[]};
+try{const h=location.hash.slice(1);if(['ocu','d1','d3','canal','rot','sku','data'].includes(h))VIEW=h}catch(e){}
 const N=v=>+v||0, dv=(a,b)=>b?a/b:0;
 const f0=new Intl.NumberFormat('es-CO',{maximumFractionDigits:0}),f1=new Intl.NumberFormat('es-CO',{minimumFractionDigits:1,maximumFractionDigits:1});
 const fmt={n0:v=>f0.format(v),n1:v=>f1.format(v),pct:v=>f0.format(v*100)+' %',t:v=>v??''};
@@ -249,13 +323,15 @@ function renderView(){
   const V=VIEWS[VIEW];$('bCols').style.display='none';$('cols').style.display='none';
   const [sk,sd]=vSort[VIEW]||V.sort;
   const f=filtered().map(derive).filter(V.filter);
+  const info=V.prep?V.prep(f):null;
   f.sort((a,b)=>{const x=a[sk],y=b[sk];if(x==null||x==='')return 1;if(y==null||y==='')return -1;return (typeof x==='number'&&typeof y==='number'?x-y:String(x).localeCompare(String(y)))*sd});
-  shown=f;copyData={h:V.cols.map(c=>c[1]),r:f.map(r=>V.cols.map(([k,,t])=>t==='pct'?Math.round(r[k]*100)+'%':typeof r[k]==='number'?Math.round(r[k]*10)/10:(r[k]??'')))};
+  shown=f;copyData={h:V.cols.map(c=>c[1]),r:f.map(r=>V.cols.map(([k,,t])=>t==='pct'||t==='pct1'?Math.round(r[k]*100)+'%':typeof r[k]==='number'?Math.round(r[k]*10)/10:(r[k]??'')))};
   const T=$('tbl');T.className='v';
   T.tHead.innerHTML=`<tr><th colspan="${V.cols.length}" class="vtitle">${V.title}</th></tr><tr>`+V.cols.map(([k,l,t])=>`<th class="${t==='t'?'t':''}" data-k="${k}">${l}${sk===k?(sd>0?' ▲':' ▼'):''}</th>`).join('')+'</tr>';
   T.tHead.querySelectorAll('th[data-k]').forEach(th=>th.onclick=()=>{const k=th.dataset.k;vSort[VIEW]=(sk===k)?[k,-sd]:[k,1];render()});
-  let body=f.map(r=>'<tr>'+V.cols.map(([k,,t,sem])=>{const v=r[k];
+  let body=f.map(r=>`<tr data-m="${esc(r.Material)}">`+V.cols.map(([k,,t,sem])=>{const v=r[k];
     if(t==='t')return `<td class="t${k==='Descripcion'?' desc':''}" title="${v??''}">${v??''}</td>`;
+    if(t==='rot')return `<td class="t b ${ROT_COLOR[v]||''}">${v}</td>`;
     return `<td class="${sem?sem(v)+' b':''}">${fmt[t](v)}</td>`}).join('')+'</tr>').join('');
   if(V.total&&f.length){const s=k=>f.reduce((a,r)=>a+N(r[k]),0),ent=s('Volumen Entregado');
     const tot={'FC TOTAL CD':s('FC TOTAL CD'),'FC MES':s('FC MES'),'Entregado KA':s('Entregado KA'),'Entregado TAT':s('Entregado TAT'),'Entregado Socios':s('Entregado Socios'),'Volumen Entregado':ent,pKA:dv(s('Entregado KA'),ent),pTAT:dv(s('Entregado TAT'),ent),pSoc:dv(s('Entregado Socios'),ent),cdfc:dv(ent,s('FC MES')),falta:s('FC TOTAL CD')-ent};
@@ -267,10 +343,182 @@ function renderView(){
   if(VIEW==='d3')k=[['SKUs',f.length,''],['TOTAL DC negativo',cnt('tot3',0),'r'],['TOTAL DC < 2',cnt('tot3',2),'a'],['En riesgo sin plan de producción',f.filter(r=>r.planta==='Sin Plan'&&r.tot3<2).length,'a']];
   if(VIEW==='canal'){const s=k=>f.reduce((a,r)=>a+N(r[k]),0),ent=s('Volumen Entregado');
     k=[['Entregado CD',f0.format(ent),''],['CD vs FC MTD',f0.format(dv(ent,s('FC MES'))*100)+' %',''],['% KA',f0.format(dv(s('Entregado KA'),ent)*100)+' %',''],['% TAT',f0.format(dv(s('Entregado TAT'),ent)*100)+' %',''],['% Socios',f0.format(dv(s('Entregado Socios'),ent)*100)+' %',''],['FC Mes − Entregado',f0.format(s('FC TOTAL CD')-ent),'a']]}
-  $('kpis').innerHTML=k.map(([l,v,c])=>`<div class="kpi ${c}"><div class="l">${l}</div><div class="v">${v}</div></div>`).join('');
+  if(VIEW==='rot'){k=kpisRot(f,info);chartsRot(f,info)}
+  $('kpis').innerHTML=k.map(([l,v,c,sub])=>`<div class="kpi ${c}"><div class="l">${l}</div><div class="v">${v}</div>${sub?`<div class="s">${sub}</div>`:''}</div>`).join('');
   $('foot').textContent=`${f.length} SKUs. ${V.note}`;
 }
-function render(){ if(!D)return; VIEW==='data'?renderData():renderView(); }
+
+/* ---------- Rotación y detalle por SKU ---------- */
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function diaMes(){
+  if(D&&D.dia)return D.dia;
+  const r=rows.find(r=>N(r['FC TOTAL CD'])>0&&N(r['FC MES'])>0);
+  return r?Math.min(31,Math.max(1,Math.round(N(r['FC MES'])/N(r['FC TOTAL CD'])*30))):new Date().getDate();
+}
+const ROT_COLOR={'Alta':'c-g','Media':'c-y','Baja':'c-r','Sin movimiento':'c-r'};
+function rotacion(r,dia){
+  const ent=N(r['Volumen Entregado']),inv=N(r['Inv. Piso']);
+  const hlDia=ent/dia,dInv=hlDia>0?inv/hlDia:(inv>0?Infinity:0);
+  const rot=ent<=0?(inv>0?'Sin movimiento':'—'):dInv<=10?'Alta':dInv<=30?'Media':'Baja';
+  return {ent,inv,hlDia,dInv,rot};
+}
+function prepRot(f){
+  const dia=diaMes();
+  f.forEach(r=>Object.assign(r,rotacion(r,dia)));
+  const tot=f.reduce((a,r)=>a+r.ent,0);let acc=0;
+  [...f].sort((a,b)=>b.ent-a.ent).forEach(r=>{const prev=acc;acc+=r.ent;r.share=dv(r.ent,tot);r.clase=r.ent<=0?'—':prev/tot<0.8?'A':prev/tot<0.95?'B':'C'});
+  return {dia,tot};
+}
+VIEWS.rot={title:'ROTACIÓN POR SKU · HL ENTREGADOS EN EL MES',filter:r=>N(r['Volumen Entregado'])>0||N(r['Inv. Piso'])>0,sort:['ent',-1],prep:prepRot,
+  note:'HL entregados = Entregado TAT + KA + Socios del mes. Días de inventario = Inv. Piso ÷ (HL entregados ÷ días transcurridos). Rotación: Alta ≤ 10 días, Media 10–30, Baja > 30, Sin movimiento = con inventario y sin entregas. Clase ABC: A = SKUs que suman el 80 % de los HL, B el siguiente 15 %, C el resto.',
+  cols:[['Material','MATERIAL','t'],['Descripcion','Descripción','t'],['clase','ABC','t'],['ent','HL entregados mes','n0'],['share','% del total','pct1'],['hlDia','HL/día real','n1'],['FC Dia','FC día','n1'],['inv','Inv. piso HL','n0'],['dInv','Días de inventario','dias'],['rot','Rotación','rot']]};
+fmt.pct1=v=>f1.format(v*100)+' %';
+fmt.dias=v=>v===Infinity?'∞':f0.format(v);
+fmt.rot=v=>v;
+function tip(el,html){el.dataset.tip=html}
+document.addEventListener('mousemove',e=>{const t=e.target.closest&&e.target.closest('[data-tip]'),T=$('tip');if(!t){T.style.display='none';return}
+  T.innerHTML=t.dataset.tip;T.style.display='block';const w=T.offsetWidth,h=T.offsetHeight;
+  T.style.left=Math.min(innerWidth-w-8,e.clientX+14)+'px';T.style.top=(e.clientY+h+20>innerHeight?e.clientY-h-10:e.clientY+16)+'px'});
+const CAN=[['Entregado KA','KA','var(--ka)'],['Entregado TAT','TAT','var(--tat)'],['Entregado Socios','Socios','var(--soc)']];
+const legendCan=()=>'<div class="legend">'+CAN.map(c=>`<span><i style="background:${c[2]}"></i>${c[1]}</span>`).join('')+'</div>';
+function chartsRot(f,info){
+  const top=[...f].filter(r=>r.ent>0).sort((a,b)=>b.ent-a.ent).slice(0,15),mx=Math.max(1,...top.map(r=>r.ent));
+  const c1=top.map(r=>`<div class="lab" data-sku="${esc(r.Material)}" title="${esc(r.Descripcion)}">${esc(r.Material)} · ${esc(r.Descripcion)}</div>
+    <div class="trk" style="width:${r.ent/mx*100}%">${CAN.map(([k,l,c])=>N(r[k])>0?`<span style="flex:${N(r[k])};background:${c}" data-tip="<b>${esc(r.Descripcion)}</b><br>${l}: ${f0.format(N(r[k]))} HL (${f0.format(dv(N(r[k]),r.ent)*100)} %)"></span>`:'').join('')}</div>
+    <div class="val">${f0.format(r.ent)} HL</div>`).join('');
+  const slow=[...f].filter(r=>(r.rot==='Baja'||r.rot==='Sin movimiento')&&r.inv>0).sort((a,b)=>b.inv-a.inv).slice(0,15),mx2=Math.max(1,...slow.map(r=>r.inv));
+  const c2=slow.length?slow.map(r=>`<div class="lab" data-sku="${esc(r.Material)}" title="${esc(r.Descripcion)}">${esc(r.Material)} · ${esc(r.Descripcion)}</div>
+    <div class="trk" style="width:${r.inv/mx2*100}%"><span style="flex:1;background:var(--neg)" data-tip="<b>${esc(r.Descripcion)}</b><br>Inventario: ${f0.format(r.inv)} HL<br>Entregado mes: ${f0.format(r.ent)} HL<br>Días de inventario: ${fmt.dias(r.dInv)}"></span></div>
+    <div class="val">${f0.format(r.inv)} HL · ${r.rot==='Sin movimiento'?'sin mov.':fmt.dias(r.dInv)+' d'}</div>`).join(''):'<div class="empty" style="grid-column:1/-1">No hay SKUs de baja rotación con estos filtros.</div>';
+  const grp=['Alta','Media','Baja','Sin movimiento'],gc={'Alta':'var(--ka)','Media':'var(--soc)','Baja':'var(--tat)','Sin movimiento':'#8a8f98'};
+  const sumBy=(k)=>grp.map(g=>f.filter(r=>r.rot===g).reduce((a,r)=>a+r[k],0));
+  const bar=(vals)=>{const t=vals.reduce((a,b)=>a+b,0)||1;return '<div class="stk">'+vals.map((v,i)=>v>0?`<span style="flex:${v};background:${gc[grp[i]]}" data-tip="<b>${grp[i]}</b>: ${f0.format(v)} HL (${f0.format(v/t*100)} %)">${v/t>0.07?f0.format(v/t*100)+' %':''}</span>`:'').join('')+'</div>'};
+  const c3=`<div class="legend">${grp.map(g=>`<span><i style="background:${gc[g]}"></i>${g} (${f.filter(r=>r.rot===g).length} SKUs)</span>`).join('')}</div>
+    <div class="stkrow"><span>Inventario en piso</span>${bar(sumBy('inv'))}</div><div class="stkrow"><span>HL entregados del mes</span>${bar(sumBy('ent'))}</div>`;
+  $('charts').innerHTML=`<div class="card viz full"><h4>¿Dónde está el inventario y dónde está el movimiento?</h4><div class="cs">Reparto de los HL por tipo de rotación. Si una barra de inventario pesa más que su barra de entregas, ese grupo está acumulando producto.</div>${c3}</div>
+   <div class="card viz"><h4>Top 15 SKUs por HL entregados</h4><div class="cs">Mes en curso, día ${info.dia}. Partido por canal. Clic en el nombre para ver la ficha.</div>${legendCan()}<div class="hb">${c1}</div></div>
+   <div class="card viz"><h4>Inventario con baja rotación</h4><div class="cs">SKUs con más de 30 días de inventario al ritmo real de entrega, o sin entregas en el mes.</div><div class="hb">${c2}</div></div>`;
+}
+function kpisRot(f,info){
+  const inv=f.reduce((a,r)=>a+r.inv,0),slow=f.filter(r=>r.rot==='Baja'||r.rot==='Sin movimiento'),slowInv=slow.reduce((a,r)=>a+r.inv,0),A=f.filter(r=>r.clase==='A');
+  return [['HL entregados en el mes',f0.format(info.tot),'',`día ${info.dia} · ${f0.format(info.tot/info.dia)} HL/día`],
+    ['SKUs clase A',A.length,'',`mueven el 80 % de los HL`],
+    ['Inventario en piso',f0.format(inv)+' HL','',`${fmt.dias(dv(inv,info.tot/info.dia))} días al ritmo actual`],
+    ['SKUs baja rotación / sin mov.',slow.length,'a',`${f.filter(r=>r.rot==='Sin movimiento').length} sin entregas en el mes`],
+    ['HL inmovilizados',f0.format(slowInv),'r',`${f0.format(dv(slowInv,inv)*100)} % del inventario`]];
+}
+
+/* ---------- Ficha por SKU ---------- */
+let SKU=null;try{SKU=localStorage.getItem('cov_sku')}catch(e){}
+function openSku(m){SKU=String(m);try{localStorage.setItem('cov_sku',SKU)}catch(e){};VIEW='sku';document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.v==='sku'));try{history.replaceState(null,'','#sku')}catch(e){};render();scrollTo({top:0,behavior:'smooth'})}
+document.addEventListener('click',e=>{const s=e.target.closest('[data-sku]');if(s){openSku(s.dataset.sku);return}
+  const tr=e.target.closest('#tbl tbody tr[data-m]');if(tr&&!e.target.closest('th'))openSku(tr.dataset.m)});
+function renderSku(){
+  const dia=diaMes();
+  const list=rows.filter(r=>N(r['Inv. Piso'])>0||N(r['FC Dia'])>0||N(r['Volumen Entregado'])>0||N(r['Inv. Transito'])>0);
+  if(!SKU||!rows.some(r=>String(r.Material)===SKU)){const best=[...list].sort((a,b)=>N(b['Volumen Entregado'])-N(a['Volumen Entregado']))[0];SKU=best?String(best.Material):null}
+  const raw=rows.find(r=>String(r.Material)===SKU);
+  const opts=[...list].sort((a,b)=>N(a.Material)-N(b.Material)).map(r=>`<option value="${esc(r.Material)} · ${esc(r.Descripcion)}">`).join('');
+  if(!raw){$('ficha').innerHTML='<div class="empty">No hay SKUs para mostrar.</div>';$('kpis').innerHTML='';return}
+  const r=derive(raw);Object.assign(r,rotacion(r,dia));
+  const all=rows.map(x=>({m:x.Material,e:N(x['Volumen Entregado'])})).sort((a,b)=>b.e-a.e),tot=all.reduce((a,x)=>a+x.e,0);
+  let acc=0,clase='—',rank=0;for(let i=0;i<all.length;i++){if(String(all[i].m)===SKU){rank=i+1;clase=r.ent<=0?'—':acc/tot<0.8?'A':acc/tot<0.95?'B':'C';break}acc+=all[i].e}
+  const sem=(fn,v)=>({'c-r':'r','c-y':'a','c-g':'g'}[fn(v)]||'');
+  $('kpis').innerHTML=[
+    ['Inventario en piso',f0.format(N(r['Inv. Piso']))+' HL','',`${f0.format(N(r.Existencia))} ${esc(r.UM)} en bodega`],
+    ['Tránsitos',f0.format(N(r['Inv. Transito']))+' HL','',`TMS: ${f0.format(N(r.TMS))} HL${r['Fecha Arribo TMS']?' · llega '+esc(r['Fecha Arribo TMS']):''}`],
+    ['FC día',f1.format(N(r['FC Dia']))+' HL','',`FC mes ${f0.format(N(r['FC TOTAL CD']))} HL`],
+    ['Cobertura D+1',f1.format(r.tot1)+' días',sem(semDC,r.tot1),'bodega + tránsitos − preventa'],
+    ['Cobertura D+3',f1.format(r.tot3),sem(semDC3,r.tot3),'en bloques de FC día ×3'],
+    ['Rotación',r.rot,{'Alta':'g','Media':'a','Baja':'r','Sin movimiento':'r'}[r.rot]||'',`clase ${clase} · #${rank} en HL · ${fmt.dias(r.dInv)} días de inventario`]
+  ].map(([l,v,c,s])=>`<div class="kpi ${c}"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join('');
+  // balance (Riesgo HL)
+  const comp=[['Inventario en piso',N(r['Inv. Piso'])],['Tránsitos',N(r['Inv. Transito'])],['TMS en camino',N(r.TMS)],['Pedidos reservados',-N(r['Inv. Reservado'])],['Venta en pedidos',-N(r['Venta Total'])],['Preventa D+1',-N(r['Venta W+1'])]];
+  const res=N(r['Riesgo HL']),mxb=Math.max(1,...comp.map(c=>Math.abs(c[1])),Math.abs(res));
+  const dbar=(l,v,cls)=>{if(Math.abs(v)<0.05)v=0;const w=Math.abs(v)/mxb*50;return `<div class="${cls||''}">${l}</div><div class="ax"><span style="${v>=0?'left:50%':'right:50%'};width:${w}%;background:${v>=0?'var(--pos)':'var(--neg)'};border-radius:${v>=0?'0 4px 4px 0':'4px 0 0 4px'}" data-tip="${l}: ${f1.format(v)} HL"></span></div><div class="v ${cls||''}">${v>0?'+':''}${f1.format(v)}</div>`};
+  const bal=comp.map(c=>dbar(c[0],c[1])).join('')+dbar('Saldo (Riesgo HL)',res,'res');
+  // canal
+  const ent=N(r['Volumen Entregado']),fcm=N(r['FC MES']),fct=N(r['FC TOTAL CD']);
+  const can=ent>0?'<div class="stk">'+CAN.map(([k,l,c])=>N(r[k])>0?`<span style="flex:${N(r[k])};background:${c}" data-tip="${l}: ${f0.format(N(r[k]))} HL">${dv(N(r[k]),ent)>0.08?l+' '+f0.format(dv(N(r[k]),ent)*100)+' %':''}</span>`:'').join('')+'</div>':'<div class="empty">Sin entregas en el mes.</div>';
+  const pc=dv(ent,fcm);
+  const kv=[['Marca',r.Marca],['Línea',r.Lines],['Empaque',r.tipo],['UM',r.UM],['Existencia',f0.format(N(r.Existencia))],['Entrega pendiente',f0.format(N(r['Cant entrega Pendien']))],['Cantidad en pedidos',f0.format(N(r['Cantidad en Pedidos']))],['Inv. final',f0.format(N(r['Inv. Final']))],['Stock out (días en control)',f1.format(N(r['Stock out']))],['Preventa D+1 (HL)',f1.format(N(r['Venta W+1']))],['Preventa D+3 (HL)',f1.format(N(r['VENTA D+3']))],['Venta TAT / KA (D+1)',f1.format(N(r['Venta tat']))+' / '+f1.format(N(r['Venta Ka']))],['Forecast KA (mes)',f0.format(N(r['Forescast KA']))],['Forecast TAT (mes)',f0.format(N(r['Forescaste TAT']))],['Volumen solicitado',f0.format(N(r['Volumen Solicitado']))],['Fecha próx. producción',r['Fecha Prox Prod']||'Sin plan'],['HL prod. plan',f0.format(N(r['Htls Prod Plan']))],['PRD 1,5 PQ',f0.format(N(r['PRD 1,5 PQ']))]];
+  $('ficha').innerHTML=`<div class="fhead"><input list="skuList" id="skuIn" placeholder="Buscar SKU por código o nombre…" value=""><datalist id="skuList">${opts}</datalist>
+     <span class="ftitle">${esc(r.Material)} · ${esc(r.Descripcion)}</span><span class="pill ${pill[raw.Estado]}">${raw.Estado}</span></div>
+    <div class="fgrid">
+     <div class="card viz"><h4>Balance de inventario</h4><div class="cs">Lo que suma (azul) y lo que ya está comprometido (naranja), en HL. El saldo es el Riesgo HL.</div><div class="div">${bal}</div></div>
+     <div class="card viz"><h4>Entregas del mes por canal</h4><div class="cs">Día ${dia} del mes. ${f0.format(ent)} HL entregados.</div>${legendCan()}${can}
+       <div style="margin-top:16px;font-size:12px;display:flex;justify-content:space-between"><span>Entregado vs FC acumulado (MTD ${f0.format(fcm)} HL)</span><b class="${semCump(pc)}" style="padding:1px 6px;border-radius:4px">${f0.format(pc*100)} %</b></div>
+       <div class="prog"><span style="width:${Math.min(100,pc*100)}%"></span></div>
+       <div style="font-size:12px;color:var(--mute)">FC del mes: ${f0.format(fct)} HL · faltan ${f0.format(Math.max(0,fct-ent))} HL · al ritmo actual cierra en ${f0.format(ent/dia*30)} HL (${f0.format(dv(ent/dia*30,fct)*100)} % del FC)</div></div>
+     <div class="card viz full"><h4>¿Quién se lleva este producto?</h4><div class="cs">Clientes que compran este SKU.</div><div class="empty">Pendiente: aquí se verán los clientes que compran este SKU, con sus HL y su participación, cuando se cargue la data de clientes.</div></div>
+     <div class="card full"><h4>Todos los datos del SKU</h4><div class="cs">${esc(r.Marca)} · ${esc(r.Lines)} · ${esc(r.tipo)}</div><div class="kv">${kv.map(([k,v])=>`<div><span>${k}</span><b>${esc(v)}</b></div>`).join('')}</div></div>
+    </div>`;
+  $('skuIn').onchange=e=>{const m=String(e.target.value).split(' · ')[0].trim();if(rows.some(x=>String(x.Material)===m))openSku(m)};
+  $('foot').textContent='Clic en cualquier SKU de las otras pestañas abre su ficha aquí.';
+  copyData={h:['Dato','Valor'],r:kv};
+}
+
+/* ---------- Ocupación de bodega ---------- */
+const CAP_DEF=36554;
+const capacidad=()=>N(D&&D.capacidad)||CAP_DEF;
+const semOcu=v=>'';  // sin semáforo por ahora
+const TIPO_COL={'1. Retornable':'#2b3467','2. Lata':'#a9adc6','3. TW':'#5a9e3a','4. Pet':'#6b6b6b'};
+const ABC_COL={'A':'#2e9089','B':'#e2875f','C':'#de6070','Sin clasificar':'#9aa0a8'};
+const LIGHT=new Set(['#a9adc6','#9aa0a8']);
+function treemap(items,x,y,w,h,out){
+  items=items.filter(i=>i.v>0);if(!items.length)return out;
+  if(items.length===1){out.push({...items[0],x,y,w,h});return out}
+  const tot=items.reduce((a,i)=>a+i.v,0);let acc=0,k=0;
+  while(k<items.length-1&&acc+items[k].v<=tot/2){acc+=items[k].v;k++}
+  if(k===0){acc=items[0].v;k=1}
+  const A=items.slice(0,k),B=items.slice(k),fr=acc/tot;
+  if(w>=h){treemap(A,x,y,w*fr,h,out);treemap(B,x+w*fr,y,w*(1-fr),h,out)}
+  else{treemap(A,x,y,w,h*fr,out);treemap(B,x,y+h*fr,w,h*(1-fr),out)}
+  return out;
+}
+function tmHtml(items,W){
+  const tot=items.reduce((a,i)=>a+i.v,0)||1;
+  const rects=treemap([...items].sort((a,b)=>b.v-a.v),0,0,W,300,[]);
+  return '<div class="tm">'+rects.map(r=>`<div class="${LIGHT.has(r.c)?'lt':''}" style="left:${r.x/W*100}%;top:${r.y}px;width:${r.w/W*100}%;height:${r.h}px;background:${r.c}" data-tip="<b>${esc(r.l)}</b><br>${f0.format(r.v)} HL · ${f1.format(r.v/tot*100)} % de la bodega"><b>${r.w>60&&r.h>26?esc(r.l):''}</b><i>${r.w>50&&r.h>44?f1.format(r.v/tot*100)+'%':''}</i></div>`).join('')+'</div>';
+}
+function miniTable(items,cap){
+  const tot=items.reduce((a,i)=>a+i.v,0)||1;
+  return `<table class="mini"><tr><th></th><th>HL en bodega</th><th>% de la bodega</th><th>% de la capacidad</th><th>SKUs</th></tr>`+
+    items.map(i=>`<tr><td><i style="background:${i.c}"></i>${esc(i.l)}</td><td>${f0.format(i.v)}</td><td>${f1.format(i.v/tot*100)} %</td><td>${f1.format(i.v/cap*100)} %</td><td>${i.n}</td></tr>`).join('')+
+    `<tr><td><b>Total</b></td><td><b>${f0.format(tot)}</b></td><td>100 %</td><td><b>${f1.format(tot/cap*100)} %</b></td><td>${items.reduce((a,i)=>a+i.n,0)}</td></tr></table>`;
+}
+function renderOcu(){
+  const f=filtered(),cap=capacidad(),s=k=>f.reduce((a,r)=>a+N(r[k]),0);
+  const piso=s('Inv. Piso'),cal=s('Inv. Calidad'),blq=s('Inv. Bloqueo'),tra=s('Inv. Transito'),calle=s('Inv. Calle');
+  const bod=piso+cal+blq,o1=bod/cap,o2=(bod+tra)/cap;
+  const enBod=r=>N(r['Inv. Piso'])+N(r['Inv. Calidad'])+N(r['Inv. Bloqueo']);
+  const group=(key,order,colors,def)=>order.map(g=>{const rs=f.filter(r=>(r[key]||def)===g&&enBod(r)>0);return {l:g,v:rs.reduce((a,r)=>a+enBod(r),0),c:colors[g],n:rs.length}}).filter(i=>i.v>0);
+  const tipos=group('tipo',Object.keys(TIPO_COL),TIPO_COL,'');
+  const abc=group('ABC',['A','B','C','Sin clasificar'],ABC_COL,'Sin clasificar');
+  const top=[...f].filter(r=>enBod(r)>0).sort((a,b)=>enBod(b)-enBod(a)).slice(0,12),mx=Math.max(1,...top.map(enBod));
+  const tile=(h,v,u,cls,big,ncls)=>`<div class="tile ${cls||''} ${big?'big':''}"><div class="h">${h}</div><div class="n ${ncls||''}">${v}</div><div class="u">${u}</div></div>`;
+  $('kpis').innerHTML='';
+  $('charts').innerHTML=`<div class="ocu full" style="grid-column:1/-1;padding:0">
+   <div class="ocu-row">${tile('PT EN PISO',f0.format(piso),'Hectolitros')}${tile('PT EN CALIDAD',f0.format(cal),'Hectolitros')}${tile('PT EN BLOQUEO',f0.format(blq),'Hectolitros')}${tile('Ocupación PT piso',f0.format(o1*100)+' %',`Ocupación · ${f0.format(bod)} de ${f0.format(cap)} HL`,'',true,semOcu(o1))}</div>
+   <div class="ocu-row r2">${tile('PT EN TRÁNSITO',f0.format(tra),'Hectolitros','y')}${tile('PT EN CALLE',f0.format(calle),'Hectolitros','y')}${tile('Espacio libre',f0.format(Math.max(0,cap-bod)),'Hectolitros disponibles en bodega')}${tile('Ocupación + Tránsitos',f0.format(o2*100)+' %',`Ocupación · ${f0.format(bod+tra)} de ${f0.format(cap)} HL`,'',true,semOcu(o2))}</div>
+  </div>
+  <div class="card viz"><h4>% Ocupación por tipo de PT</h4><div class="cs">HL en bodega (piso + calidad + bloqueo) por empaque.</div>${tmHtml(tipos,600)}${miniTable(tipos,cap)}</div>
+  <div class="card viz"><h4>% Ocupación por clasificación ABC</h4><div class="cs">Según la pestaña ABC del Excel (A = SKUs de mayor forecast).</div>${tmHtml(abc,600)}${miniTable(abc,cap)}</div>
+  <div class="card viz full"><h4>SKUs que más espacio ocupan</h4><div class="cs">Top 12 por HL en bodega. Clic en el nombre para ver la ficha.</div>
+   <div class="hb">${top.map(r=>{const v=enBod(r),c=ABC_COL[r.ABC||'Sin clasificar'];return `<div class="lab" data-sku="${esc(r.Material)}">${esc(r.Material)} · ${esc(r.Descripcion)}</div><div class="trk" style="width:${v/mx*100}%"><span style="flex:1;background:${c}" data-tip="<b>${esc(r.Descripcion)}</b><br>${f0.format(v)} HL en bodega · clase ${esc(r.ABC||'sin clasificar')}<br>${f1.format(v/cap*100)} % de la capacidad"></span></div><div class="val">${f0.format(v)} HL · ${esc(r.ABC||'—')}</div>`}).join('')}</div>
+   <div class="legend" style="margin-top:10px">${Object.entries(ABC_COL).map(([k,c])=>`<span><i style="background:${c}"></i>${k==='Sin clasificar'?k:'Clase '+k}</span>`).join('')}</div></div>`;
+  copyData={h:['Grupo','HL en bodega','SKUs'],r:[...tipos.map(i=>[i.l,Math.round(i.v),i.n]),...abc.map(i=>['Clase '+i.l,Math.round(i.v),i.n])]};
+  $('foot').textContent=`Capacidad de la bodega: ${f0.format(cap)} HL. Ocupación PT piso = (piso + calidad + bloqueo) ÷ capacidad. Ocupación + tránsitos suma el almacén de tránsito (1940). PT en calle = almacén 1941. Con filtros, los valores son solo de los SKUs filtrados.`;
+}
+function layout(){
+  const sku=VIEW==='sku';
+  document.querySelector('.bar').style.display=sku?'none':'';
+  document.querySelector('.wrap').style.display=(sku||VIEW==='ocu')?'none':'';
+  $('bCols').style.display=VIEW==='data'?'':'none';
+  $('ficha').style.display=sku?'block':'none';
+  if(VIEW!=='rot'&&VIEW!=='ocu')$('charts').innerHTML='';
+}
+function render(){ if(!D)return; layout(); VIEW==='data'?renderData():VIEW==='sku'?renderSku():VIEW==='ocu'?renderOcu():renderView(); }
 document.querySelectorAll('#tabs button').forEach(b=>{b.classList.toggle('on',b.dataset.v===VIEW);b.onclick=()=>{VIEW=b.dataset.v;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));try{history.replaceState(null,'','#'+VIEW)}catch(e){};render()}});
 ['q','fMarca','fLines','fTipo','fEstado','fMov'].forEach(id=>$(id).addEventListener('input',render));
 $('bCols').onclick=()=>{const c=$('cols');c.style.display=c.style.display==='block'?'none':'block'};
@@ -293,6 +541,7 @@ function readWb(file){return file.arrayBuffer().then(b=>XLSX.read(b,{type:'array
 const boxes={zexi:'dZ',tms:'dT',prev:'dP',wb:'dW'};
 function mark(k,ok,txt){const el=$(boxes[k]);el.classList.toggle('ok',!!ok);el.classList.toggle('err',ok===false);el.querySelector('small').textContent=txt}
 let pending=null;
+$('capIn').addEventListener('input',()=>{const v=N($('capIn').value);if(v>0&&pending){pending.capacidad=v;D.capacidad=v;render()}});
 document.querySelectorAll('#upd input[type=file]').forEach(inp=>inp.onchange=async()=>{
   const f=inp.files[0];if(!f)return;const k=inp.dataset.k;
   try{
@@ -320,6 +569,7 @@ async function preview(){
   const res=Engine.compute(MASTER,files.zexi,files.tms||[],files.prev,new Date());
   const now=new Date(),pad=n=>String(n).padStart(2,'0');
   res.generado=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  res.capacidad=N($('capIn').value)||capacidad();
   pending=res;setData(res,'vista previa sin publicar');$('stale').innerHTML='<span class="badge">Vista previa</span>';
   msg(`Listo: ${res.stats.skusConZexi} de ${res.rows.length} SKUs encontrados en ZEXI_01. Revisa la tabla y publica.`);
   $('bPub').disabled=!(FB&&puedeEditar());
@@ -333,7 +583,7 @@ $('bPub').onclick=async()=>{
     const version=Date.now().toString(36),size=150,n=Math.ceil(pending.rows.length/size);
     const batch=writeBatch(FB);
     for(let i=0;i<n;i++)batch.set(doc(FB,COL,'c'+i),{version,rows:JSON.stringify(pending.rows.slice(i*size,(i+1)*size))});
-    batch.set(doc(FB,COL,'meta'),{version,chunks:n,columns:pending.columns,semana:pending.semana,centro:pending.centro,generado:pending.generado,por:USER.displayName||USER.email,stats:pending.stats});
+    batch.set(doc(FB,COL,'meta'),{version,chunks:n,dia:pending.dia||null,capacidad:pending.capacidad||null,columns:pending.columns,semana:pending.semana,centro:pending.centro,generado:pending.generado,por:USER.displayName||USER.email,stats:pending.stats});
     await batch.commit();
     curVersion=null;msg('Publicado. Todos ven ahora esta versión.');toast('Publicado para todos');$('stale').innerHTML='';
   }catch(e){msg(e&&e.code==='permission-denied'?'Firebase rechazó la escritura: tu correo no está en las reglas de Firestore.':'No se pudo publicar ('+(e.code||e.message||e)+')',true);$('bPub').disabled=false}
