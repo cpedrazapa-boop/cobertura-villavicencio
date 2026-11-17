@@ -306,6 +306,10 @@ function renderData(){
 /* ---------- Vistas ---------- */
 let VIEW='ocu',copyData={h:[],r:[]};
 try{const h=location.hash.slice(1);if(['ocu','d1','d3','canal','rot','sku','data'].includes(h))VIEW=h}catch(e){}
+// Enlace de una sola vista: index.html?centro=AV19&vista=canal (oculta las demás pestañas)
+let SOLO=null;try{const v=(new URLSearchParams(location.search).get('vista')||'').toLowerCase();if(['ocu','d1','d3','canal','rot','sku','data'].includes(v)&&document.body.dataset.modo!=='cargar'){SOLO=v;VIEW=v}}catch(e){}
+if(SOLO){document.getElementById('tabs').style.display='none';const t={ocu:'Ocupación bodega',d1:'Cobertura D+1',d3:'Cobertura D+3',canal:'Volumen entregado por canal',rot:'Rotación por SKU',sku:'Detalle por SKU',data:'Tabla completa'}[SOLO];
+  setTimeout(()=>{try{$('h1').textContent=t+' · '+CEN.nombre;document.title=t+' · '+CEN.nombre;$('cen').querySelectorAll('a').forEach(a=>{a.href=a.href.split('?')[0]+'?centro='+a.href.split('centro=')[1].split('&')[0].split('#')[0]+'&vista='+SOLO})}catch(e){}},0)}
 const N=v=>+v||0, dv=(a,b)=>b?a/b:0;
 const f0=new Intl.NumberFormat('es-CO',{maximumFractionDigits:0}),f1=new Intl.NumberFormat('es-CO',{minimumFractionDigits:1,maximumFractionDigits:1});
 const fmt={n0:v=>f0.format(v),n1:v=>f1.format(v),pct:v=>f0.format(v*100)+' %',t:v=>v??''};
@@ -428,7 +432,7 @@ function kpisRot(f,info){
 
 /* ---------- Ficha por SKU ---------- */
 let SKU=null;try{SKU=localStorage.getItem('cov_sku')}catch(e){}
-function openSku(m){SKU=String(m);try{localStorage.setItem('cov_sku',SKU)}catch(e){};VIEW='sku';document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.v==='sku'));try{history.replaceState(null,'','#sku')}catch(e){};render();scrollTo({top:0,behavior:'smooth'})}
+function openSku(m){if(SOLO&&SOLO!=='sku')return;SKU=String(m);try{localStorage.setItem('cov_sku',SKU)}catch(e){};VIEW='sku';document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.v==='sku'));try{history.replaceState(null,'','#sku')}catch(e){};render();scrollTo({top:0,behavior:'smooth'})}
 document.addEventListener('click',e=>{const s=e.target.closest('[data-sku]');if(s){openSku(s.dataset.sku);return}
   const tr=e.target.closest('#tbl tbody tr[data-m]');if(tr&&!e.target.closest('th'))openSku(tr.dataset.m)});
 function renderSku(){
