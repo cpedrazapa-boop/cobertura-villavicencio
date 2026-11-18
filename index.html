@@ -280,8 +280,8 @@ table thead th{background:var(--card)}
 <div id="toast"></div>
 <div id="tip"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="centros.js?v=5"></script>
-<script src="engine.js?v=5"></script>
+<script src="centros.js?v=20261118b"></script>
+<script src="engine.js?v=20261118b"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -628,12 +628,21 @@ function renderOcu(){
   copyData={h:['Grupo','HL en bodega','SKUs'],r:[...tipos.map(i=>[i.l,Math.round(i.v),i.n]),...abc.map(i=>['Clase '+i.l,Math.round(i.v),i.n])]};
   $('foot').textContent=`Capacidad de la bodega: ${f0.format(cap)} HL. Ocupación PT piso = (piso + calidad + bloqueo) ÷ capacidad. Ocupación + tránsitos suma el almacén de tránsito (${PRE}40). PT en calle = almacén ${PRE}41. Con filtros, los valores son solo de los SKUs filtrados.`;
 }
+let NOMBRES=null,nombresPidiendo=false;
+async function cargarNombres(){
+  if(NOMBRES||nombresPidiendo||!FB)return;nombresPidiendo=true;
+  try{const col=CENTROS[Object.keys(CENTROS)[0]].col,m=await getDoc(doc(FB,col,'cmeta'));
+    if(m.exists()){const b=m.data(),ps=await Promise.all(Array.from({length:b.chunks},(_,i)=>getDoc(doc(FB,col,'cm'+i))));const map={};ps.forEach(p=>{if(p.exists())Object.assign(map,JSON.parse(p.data().data))});NOMBRES=map;if(VIEW==='sku')render()}}
+  catch(e){}finally{nombresPidiendo=false}
+}
 function clientesHtml(sku){
   if(!CLIENTES)return '<div class="empty">No hay datos de clientes en la última publicación. Se llenan al publicar con la preventa en crudo (archivo de surtido).</div>';
   const L=CLIENTES[String(sku)];if(!L||!L.length)return '<div class="empty">Este SKU no tiene pedidos en la preventa cargada.</div>';
+  if(!NOMBRES&&L.some(x=>!x[4]))cargarNombres();
+  const nom=x=>x[4]||(NOMBRES&&NOMBRES[String(x[0])])||'';
   const tot=L.reduce((a,x)=>a+x[1],0),top=L.slice(0,15),mx=top[0][1]||1,t5=L.slice(0,5).reduce((a,x)=>a+x[1],0);
   return `<div class="legend"><span>${L.length} clientes · ${f1.format(tot)} HL en preventa · los 5 primeros llevan el ${f0.format(dv(t5,tot)*100)} %</span><span><i style="background:var(--tat)"></i>TAT (ZCP1)</span><span><i style="background:var(--ka)"></i>KA (ZCP6)</span></div>
-   <div class="hb">${top.map(([c,hl,docs,tp,nm])=>`<div class="lab" style="cursor:default" title="Cliente ${esc(c)}">${nm?esc(nm)+' <span style="color:var(--mute)">· '+esc(c)+'</span>':'Cliente '+esc(c)}</div><div class="trk" style="width:${hl/mx*100}%"><span style="flex:1;background:${tp==='ZCP6'?'var(--ka)':'var(--tat)'}" data-tip="<b>${esc(nm||'Cliente '+c)}</b><br>Código ${esc(c)}<br>${f1.format(hl)} HL · ${docs} pedido${docs===1?'':'s'} · ${tp==='ZCP6'?'KA':'TAT'}"></span></div><div class="val">${f1.format(hl)} HL · ${f0.format(dv(hl,tot)*100)} %</div>`).join('')}</div>
+   <div class="hb">${top.map(x=>{const [c,hl,docs,tp]=x,nm=nom(x);return `<div class="lab" style="cursor:default" title="Cliente ${esc(c)}">${nm?esc(nm)+' <span style="color:var(--mute)">· '+esc(c)+'</span>':'Cliente '+esc(c)}</div><div class="trk" style="width:${hl/mx*100}%"><span style="flex:1;background:${tp==='ZCP6'?'var(--ka)':'var(--tat)'}" data-tip="<b>${esc(nm||'Cliente '+c)}</b><br>Código ${esc(c)}<br>${f1.format(hl)} HL · ${docs} pedido${docs===1?'':'s'} · ${tp==='ZCP6'?'KA':'TAT'}"></span></div><div class="val">${f1.format(hl)} HL · ${f0.format(dv(hl,tot)*100)} %</div>`}).join('')}</div>
    ${L.length>15?`<div class="cs" style="margin-top:8px">Y ${L.length-15} clientes más con ${f1.format(tot-top.reduce((a,x)=>a+x[1],0))} HL.</div>`:''}`;
 }
 
@@ -760,7 +769,7 @@ function renderFiles(){
       return `<div class="fitem ${g.length?'ok':''}"><span>${g.length?'✓':'–'}</span><b>${TIPOS[k]} (mensual)</b><span>${g.length?'Usando el guardado: '+g.map(([c,x])=>`${nomC(c)} mes ${x.mes||'?'} (cargado ${esc(x.cargado||'')})`).join(' · ')+'. Súbelo solo cuando cambie el mes.':'No hay pronóstico guardado: Villavicencio usa el FC del Excel y Yopal queda sin FC. Súbelo una vez al mes.'}</span></div>`}
     if(!f&&k==='cli')return `<div class="fitem ${CLI_GUARDADO?'ok':''}"><span>${CLI_GUARDADO?'✓':'–'}</span><b>${TIPOS[k]} (ocasional)</b><span>${CLI_GUARDADO?`Usando el guardado: ${f0.format(Object.keys(CLI_GUARDADO.map).length)} clientes (cargado ${esc(CLI_GUARDADO.cargado||'')}).`:'No hay maestro guardado: los clientes se verán solo con su código.'}</span></div>`;
     if(!f)return `<div class="fitem ${need?'err':''}"><span>${need?'✗':'–'}</span><b>${TIPOS[k]}</b><span>${need?'Falta (obligatorio)':'No cargado (opcional)'}</span></div>`;
-    return `<div class="fitem ${f.warn?'warn':'ok'}"><span>${f.warn?'!':'✓'}</span><b>${TIPOS[k]}</b><span>${esc(f.name)} — ${esc(f.info)}</span></div>`}).join('')+
+    return `<div class="fitem ${f.warn?'warn':'ok'}"><span>${f.warn?'!':'✓'}</span><b>${TIPOS[k]}</b><span>${esc(f.name)} — ${esc(f.info)}${k==='cli'?(f.guardado?' <b style="color:var(--grn)">Guardado.</b>':' <button class="pri" id="bSaveCli" style="margin-left:6px;padding:3px 10px">Guardar clientes ahora</button>'):''}</span></div>`}).join('')+
     extras.map(x=>`<div class="fitem err"><span>✗</span><b>${esc(x.name)}</b><span>${esc(x.info)}</span></div>`).join('');
 }
 async function addFiles(list){
@@ -777,6 +786,11 @@ async function addFiles(list){
   }
   renderFiles();await preview();
 }
+document.addEventListener('click',async e=>{if(e.target.id!=='bSaveCli')return;
+  if(!FB){msg('Falta configurar Firebase.',true);return}if(!USER||!puedeEditar()){msg('Entra con tu correo y contraseña para guardar el maestro de clientes.',true);return}
+  e.target.disabled=true;e.target.textContent='Guardando…';
+  try{await guardarClientes();msg('Maestro de clientes guardado: '+f0.format(Object.keys(files.cli.data).length)+' clientes. Los nombres ya se ven en la ficha de cada SKU.');render()}
+  catch(err){e.target.disabled=false;e.target.textContent='Guardar clientes ahora';msg('No se pudo guardar el maestro de clientes ('+(err.code||err.message)+')',true)}});
 $('fAll').onchange=e=>{addFiles([...e.target.files]);e.target.value=''};
 const dz=$('dAll');['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('over')}));
 ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('over')}));
@@ -820,6 +834,13 @@ async function preview(){
   else if(!puedeEditar())msg('Tu correo no está autorizado para publicar.',true);
 }
 function conNombres(cl){if(!cl)return cl;const NM=files.cli?files.cli.data:(CLI_GUARDADO?CLI_GUARDADO.map:{}),o={};for(const k in cl)o[k]=cl[k].map(x=>[x[0],x[1],x[2],x[3],x[4]||NM[String(x[0])]||'']);return o}
+async function guardarClientes(){
+  const ents=Object.entries(files.cli.data),n=Math.ceil(ents.length/5000),bt=writeBatch(FB);
+  const now=new Date(),pad=x=>String(x).padStart(2,'0'),cargado=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  for(let i=0;i<n;i++)bt.set(doc(FB,CLI_COL(),'cm'+i),{data:JSON.stringify(Object.fromEntries(ents.slice(i*5000,(i+1)*5000)))});
+  bt.set(doc(FB,CLI_COL(),'cmeta'),{chunks:n,cargado,n:ents.length});await bt.commit();
+  CLI_GUARDADO={cargado,map:files.cli.data};files.cli.guardado=true;NOMBRES=files.cli.data;renderFiles();
+}
 function chunkClientes(cl){
   const out=[];let cur={},size=0;
   cl=conNombres(cl);
@@ -848,9 +869,7 @@ $('bPub').onclick=async()=>{
       await batch.commit();ok.push(nomC(c));
     }catch(e){bad.push(nomC(c)+(e&&e.code==='permission-denied'?' (Firebase no dejó guardar: revisa que las reglas incluyan '+col+')':' ('+(e.code||e.message||e)+')'))}
   }
-  if(files.cli&&ok.length){try{const ents=Object.entries(files.cli.data),n=Math.ceil(ents.length/5000),bt=writeBatch(FB),cargado=Object.values(pending)[0].generado;
-    for(let i=0;i<n;i++)bt.set(doc(FB,CLI_COL(),'cm'+i),{data:JSON.stringify(Object.fromEntries(ents.slice(i*5000,(i+1)*5000)))});
-    bt.set(doc(FB,CLI_COL(),'cmeta'),{chunks:n,cargado,n:ents.length});await bt.commit();CLI_GUARDADO={cargado,map:files.cli.data}}catch(e){bad.push('maestro de clientes ('+(e.code||e.message)+')')}}
+  if(files.cli&&ok.length&&!files.cli.guardado){try{await guardarClientes()}catch(e){bad.push('maestro de clientes ('+(e.code||e.message)+')')}}
   curVersion=null;for(const k in TSO_CACHE)delete TSO_CACHE[k];
   if(files.fc)for(const c of Object.keys(pending))if(files.fc.data.fc[c])FC_GUARDADO[c]={mes:files.fc.data.mes,cargado:pending[c].generado,fc:files.fc.data.fc[c]};
   if(bad.length){msg((ok.length?'Publicado: '+ok.join(' y ')+'. ':'')+'No se pudo publicar: '+bad.join('; '),true);$('bPub').disabled=false}
