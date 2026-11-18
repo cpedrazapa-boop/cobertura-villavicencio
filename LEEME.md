@@ -86,3 +86,14 @@ Después sube el nuevo `master.json` al repositorio.
 - Los almacenes salen del código del centro: AV19 → 1901 (bodega), 1940 (tránsito), 1941 (calle); AV24 → 2401, 2440, 2441.
 - Las reglas de Firestore (`firestore.rules`) deben permitir las colecciones `cobertura` y `cobertura_AV24`.
 - El maestro de productos (`master.json`) es el mismo para los dos centros.
+
+## Enlace con una sola vista
+Agrega `&vista=` al enlace público para mostrar solo esa pestaña, sin las demás:
+- `index.html?centro=AV19&vista=canal` (volumen entregado por canal, Villavicencio)
+- Otras vistas: `ocu` (ocupación), `d1`, `d3`, `canal`, `rot` (rotación), `sku` (detalle), `data` (tabla completa)
+Es un enlace de presentación: los datos siguen siendo los mismos de la página pública.
+
+## TSO (stock out teórico)
+- Stock out del SKU = FCST día − HL en piso, cuando el piso no alcanza. TSO día = stock out ÷ FCST del día. TSO mes = acumulado de los días con foto.
+- Cada publicación guarda en Firebase la "foto" del día (`tso_AAAA-MM-DD`: HL en piso y FCST día por SKU). Vale la primera publicación del día (la de la mañana, antes de las 7); las siguientes no la cambian. Si la de la mañana quedó mal, marca "Reemplazar la foto TSO de hoy" al publicar.
+- La meta del gráfico está en `TSO_META` (3,5 %) dentro de index.html y cargador.html.
