@@ -248,7 +248,7 @@ table thead th{background:var(--card)}
     <button class="pri" id="bLogin">Entrar</button>
   </div>
   <div class="drops">
-    <label class="drop" id="dAll" style="grid-column:1/-1;padding:18px;text-align:center"><b>Arrastra aquí los archivos del día (o haz clic para elegirlos)</b><small>ZEXI de SAP, TMS Shipment Plan (.xlsb), Preventa / surtido (.csv), SL base 1 y base 2, y una vez al mes el pronóstico (FC y ABC). Pueden venir con los dos CD; súbelos todos juntos o uno por uno: el cargador reconoce cada archivo.</small><input type="file" id="fAll" multiple accept=".xlsx,.xls,.xlsm,.xlsb,.csv,.txt,.XLS"></label>
+    <label class="drop" id="dAll" style="grid-column:1/-1;padding:18px;text-align:center"><b>Arrastra aquí los archivos del día (o haz clic para elegirlos)</b><small>ZEXI de SAP, TMS Shipment Plan (.xlsb), Preventa / surtido (.csv), SL base 1 y base 2, una vez al mes el pronóstico (FC y ABC) y, cuando lo actualices, el maestro de clientes. Pueden venir con los dos CD; súbelos todos juntos o uno por uno: el cargador reconoce cada archivo.</small><input type="file" id="fAll" multiple accept=".xlsx,.xls,.xlsm,.xlsb,.csv,.txt,.XLS"></label>
   </div>
   <div id="flist" class="flist"></div>
   <div id="cenTbl"></div>
@@ -440,11 +440,12 @@ function renderView(){
   const f=filtered().map(derive).filter(V.filter);
   const info=V.prep?V.prep(f):null;
   f.sort((a,b)=>{const x=a[sk],y=b[sk];if(x==null||x==='')return 1;if(y==null||y==='')return -1;return (typeof x==='number'&&typeof y==='number'?x-y:String(x).localeCompare(String(y)))*sd});
-  shown=f;copyData={h:V.cols.map(c=>c[1]),r:f.map(r=>V.cols.map(([k,,t])=>t==='pct'||t==='pct1'?Math.round(r[k]*100)+'%':typeof r[k]==='number'?Math.round(r[k]*10)/10:(r[k]??'')))};
+  const ft=V.show?f.filter(V.show):f;
+  shown=ft;copyData={h:V.cols.map(c=>c[1]),r:ft.map(r=>V.cols.map(([k,,t])=>t==='pct'||t==='pct1'?Math.round(r[k]*100)+'%':typeof r[k]==='number'?Math.round(r[k]*10)/10:(r[k]??'')))};
   const T=$('tbl');T.className='v';
   T.tHead.innerHTML=`<tr><th colspan="${V.cols.length}" class="vtitle">${V.title}</th></tr><tr>`+V.cols.map(([k,l,t])=>`<th class="${t==='t'?'t':''}" data-k="${k}">${l}${sk===k?(sd>0?' ▲':' ▼'):''}</th>`).join('')+'</tr>';
   T.tHead.querySelectorAll('th[data-k]').forEach(th=>th.onclick=()=>{const k=th.dataset.k;vSort[VIEW]=(sk===k)?[k,-sd]:[k,1];render()});
-  let body=f.map(r=>`<tr data-m="${esc(r.Material)}">`+V.cols.map(([k,,t,sem])=>{const v=r[k];
+  let body=ft.map(r=>`<tr data-m="${esc(r.Material)}">`+V.cols.map(([k,,t,sem])=>{const v=r[k];
     if(t==='t')return `<td class="t${k==='Descripcion'?' desc':''}" title="${v??''}">${v??''}</td>`;
     if(t==='rot')return `<td class="t b ${ROT_COLOR[v]||''}">${v}</td>`;
     return `<td class="${sem?sem(v)+' b':''}">${fmt[t](v)}</td>`}).join('')+'</tr>').join('');
@@ -460,7 +461,7 @@ function renderView(){
     k=[['Entregado CD',f0.format(ent),''],['CD vs FC MTD',f0.format(dv(ent,s('FC MES'))*100)+' %',''],['% KA',f0.format(dv(s('Entregado KA'),ent)*100)+' %',''],['% TAT',f0.format(dv(s('Entregado TAT'),ent)*100)+' %',''],['% Socios',f0.format(dv(s('Entregado Socios'),ent)*100)+' %',''],['FC Mes − Entregado',f0.format(s('FC TOTAL CD')-ent),'a']]}
   if(VIEW==='rot'){k=kpisRot(f,info);chartsRot(f,info)}
   $('kpis').innerHTML=k.map(([l,v,c,sub])=>`<div class="kpi ${c}"><div class="l">${l}</div><div class="v">${v}</div>${sub?`<div class="s">${sub}</div>`:''}</div>`).join('');
-  $('foot').textContent=`${f.length} SKUs. ${V.note}`;
+  $('foot').textContent=`${ft.length} SKUs. ${V.note}`;
 }
 
 /* ---------- Rotación y detalle por SKU ---------- */
@@ -472,7 +473,7 @@ function diaMes(){
 }
 const ROT_COLOR={'Alta':'c-g','Media':'c-y','Baja':'c-r','Sin movimiento':'c-r'};
 function rotacion(r,dia){
-  const ent=N(r['Volumen Entregado']),inv=N(r['Inv. Piso']);
+  const ent=N(r['Volumen Entregado']),inv0=N(r['Inv. Piso']),inv=inv0>=0.5?inv0:0; // menos de 0,5 HL es residuo, no inventario
   const hlDia=ent/dia,dInv=hlDia>0?inv/hlDia:(inv>0?Infinity:0);
   const rot=ent<=0?(inv>0?'Sin movimiento':'—'):dInv<=10?'Alta':dInv<=30?'Media':'Baja';
   return {ent,inv,hlDia,dInv,rot};
@@ -484,11 +485,11 @@ function prepRot(f){
   [...f].sort((a,b)=>b.ent-a.ent).forEach(r=>{const prev=acc;acc+=r.ent;r.share=dv(r.ent,tot);r.clase=r.ent<=0?'—':prev/tot<0.8?'A':prev/tot<0.95?'B':'C'});
   return {dia,tot};
 }
-VIEWS.rot={title:'ROTACIÓN POR SKU · HL ENTREGADOS EN EL MES',filter:r=>N(r['Volumen Entregado'])>0||N(r['Inv. Piso'])>0,sort:['ent',-1],prep:prepRot,
-  note:'HL entregados = Entregado TAT + KA + Socios del mes. Días de inventario = Inv. Piso ÷ (HL entregados ÷ días transcurridos). Rotación: Alta ≤ 10 días, Media 10–30, Baja > 30, Sin movimiento = con inventario y sin entregas. Clase ABC: A = SKUs que suman el 80 % de los HL, B el siguiente 15 %, C el resto.',
+VIEWS.rot={title:'ROTACIÓN POR SKU · HL ENTREGADOS EN EL MES',show:r=>r.inv>0,filter:r=>N(r['Volumen Entregado'])>0||N(r['Inv. Piso'])>0,sort:['ent',-1],prep:prepRot,
+  note:'HL entregados = Entregado TAT + KA + Socios del mes. Días de inventario = Inv. Piso ÷ (HL entregados ÷ días transcurridos). Rotación: Alta ≤ 10 días, Media 10–30, Baja > 30, Sin movimiento = con inventario y sin entregas en el mes. La tabla muestra solo SKUs con inventario en piso (desde 0,5 HL); los totales de arriba incluyen todo lo entregado. Clase ABC: A = SKUs que suman el 80 % de los HL, B el siguiente 15 %, C el resto.',
   cols:[['Material','MATERIAL','t'],['Descripcion','Descripción','t'],['clase','ABC','t'],['ent','HL entregados mes','n0'],['share','% del total','pct1'],['hlDia','HL/día real','n1'],['FC Dia','FC día','n1'],['inv','Inv. piso HL','n0'],['dInv','Días de inventario','dias'],['rot','Rotación','rot']]};
 fmt.pct1=v=>f1.format(v*100)+' %';
-fmt.dias=v=>v===Infinity?'∞':f0.format(v);
+fmt.dias=v=>v===Infinity?'Sin entregas':f0.format(v);
 fmt.rot=v=>v;
 function tip(el,html){el.dataset.tip=html}
 document.addEventListener('mousemove',e=>{const t=e.target.closest&&e.target.closest('[data-tip]'),T=$('tip');if(!t){T.style.display='none';return}
@@ -545,7 +546,7 @@ function renderSku(){
     ['FC día',f1.format(N(r['FC Dia']))+' HL','',`FC mes ${f0.format(N(r['FC TOTAL CD']))} HL`],
     ['Cobertura D+1',f1.format(r.tot1)+' días',sem(semDC,r.tot1),'bodega + tránsitos − preventa'],
     ['Cobertura D+3',f1.format(r.tot3),sem(semDC3,r.tot3),'en bloques de FC día ×3'],
-    ['Rotación',r.rot,{'Alta':'g','Media':'a','Baja':'r','Sin movimiento':'r'}[r.rot]||'',`clase ${clase} · #${rank} en HL · ${fmt.dias(r.dInv)} días de inventario`]
+    ['Rotación',r.rot,{'Alta':'g','Media':'a','Baja':'r','Sin movimiento':'r'}[r.rot]||'',`clase ${clase} · #${rank} en HL · ${r.dInv===Infinity?"sin entregas en el mes":fmt.dias(r.dInv)+" días de inventario"}`]
   ].map(([l,v,c,s])=>`<div class="kpi ${c}"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join('');
   // balance (Riesgo HL)
   const comp=[['Inventario en piso',N(r['Inv. Piso'])],['Tránsitos',N(r['Inv. Transito'])],['TMS en camino',N(r.TMS)],['Pedidos reservados',-N(r['Inv. Reservado'])],['Venta en pedidos',-N(r['Venta Total'])],['Preventa D+1',-N(r['Venta W+1'])]];
@@ -632,7 +633,7 @@ function clientesHtml(sku){
   const L=CLIENTES[String(sku)];if(!L||!L.length)return '<div class="empty">Este SKU no tiene pedidos en la preventa cargada.</div>';
   const tot=L.reduce((a,x)=>a+x[1],0),top=L.slice(0,15),mx=top[0][1]||1,t5=L.slice(0,5).reduce((a,x)=>a+x[1],0);
   return `<div class="legend"><span>${L.length} clientes · ${f1.format(tot)} HL en preventa · los 5 primeros llevan el ${f0.format(dv(t5,tot)*100)} %</span><span><i style="background:var(--tat)"></i>TAT (ZCP1)</span><span><i style="background:var(--ka)"></i>KA (ZCP6)</span></div>
-   <div class="hb">${top.map(([c,hl,docs,tp])=>`<div class="lab" style="cursor:default">Cliente ${esc(c)}</div><div class="trk" style="width:${hl/mx*100}%"><span style="flex:1;background:${tp==='ZCP6'?'var(--ka)':'var(--tat)'}" data-tip="Cliente ${esc(c)}<br>${f1.format(hl)} HL · ${docs} pedido${docs===1?'':'s'} · ${tp==='ZCP6'?'KA':'TAT'}"></span></div><div class="val">${f1.format(hl)} HL · ${f0.format(dv(hl,tot)*100)} %</div>`).join('')}</div>
+   <div class="hb">${top.map(([c,hl,docs,tp,nm])=>`<div class="lab" style="cursor:default" title="Cliente ${esc(c)}">${nm?esc(nm)+' <span style="color:var(--mute)">· '+esc(c)+'</span>':'Cliente '+esc(c)}</div><div class="trk" style="width:${hl/mx*100}%"><span style="flex:1;background:${tp==='ZCP6'?'var(--ka)':'var(--tat)'}" data-tip="<b>${esc(nm||'Cliente '+c)}</b><br>Código ${esc(c)}<br>${f1.format(hl)} HL · ${docs} pedido${docs===1?'':'s'} · ${tp==='ZCP6'?'KA':'TAT'}"></span></div><div class="val">${f1.format(hl)} HL · ${f0.format(dv(hl,tot)*100)} %</div>`).join('')}</div>
    ${L.length>15?`<div class="cs" style="margin-top:8px">Y ${L.length-15} clientes más con ${f1.format(tot-top.reduce((a,x)=>a+x[1],0))} HL.</div>`:''}`;
 }
 
@@ -737,7 +738,7 @@ async function readFileRows(file){
   const wb=XLSX.read(buf,{type:'array',cellDates:true,dense:true,...(want.length?{sheets:want}:{})});
   return wb.SheetNames.filter(n=>wb.Sheets[n]).map(n=>({name:n,rows:XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:null})}));
 }
-const TIPOS={zexi:'ZEXI · inventario',tms:'TMS',prev:'Preventa',sl1:'SL base 1 · solicitado',sl2:'SL base 2 · entregado por canal',fc:'Pronóstico del mes · FC y ABC'};
+const TIPOS={zexi:'ZEXI · inventario',tms:'TMS',prev:'Preventa',sl1:'SL base 1 · solicitado',sl2:'SL base 2 · entregado por canal',fc:'Pronóstico del mes · FC y ABC',cli:'Maestro de clientes · nombres'};
 const CODS=Object.keys(CENTROS);
 const nomC=c=>(CENTROS[c]&&CENTROS[c].nombre)||c;
 const extras=[];
@@ -747,15 +748,17 @@ function parseTipo(k,rows){
   if(k==='prev'){const d=Engine.parsePreventa(rows,new Date());if(d['*'])return {data:d,info:'formato del Excel (un solo centro: '+nomC(CENTRO)+')'};
     return {data:d,info:Object.entries(d).filter(([c])=>CENTROS[c]).map(([c,p])=>`${nomC(c)}: D+1 = día ${p.d1day}, D+3 = días ${p.dias[0]} a ${p.dias[p.dias.length-1]}, ${Object.keys(p.clientes).length} SKUs`).join(' · ')}}
   if(k==='fc'){const d=Engine.parseFC(rows);return {data:d,info:`mes ${d.mes||'?'}, semanas ${d.semanas.join(', ')} · `+Object.keys(d.fc).filter(c=>CENTROS[c]).map(c=>{const v=Object.values(d.fc[c]);return `${nomC(c)}: ${f0.format(v.reduce((a,x)=>a+x.fc,0))} HL, A=${v.filter(x=>x.abc==='A').length} B=${v.filter(x=>x.abc==='B').length} C=${v.filter(x=>x.abc==='C').length}`}).join(' · ')+'. Se guarda al publicar y se usa hasta que subas el del próximo mes.'}}
+  if(k==='cli'){const d=Engine.parseClientes(rows),n=Object.keys(d).length;if(!n)throw new Error('no trae clientes');return {data:d,info:`${f0.format(n)} clientes con nombre. Se guarda al publicar y se usa en adelante; súbelo de nuevo solo cuando lo actualices.`}}
   if(k==='sl1'){const d=Engine.parseSL(rows);return {data:d,info:Object.keys(d.sol).filter(c=>CENTROS[c]).map(c=>`${nomC(c)}: ${Object.keys(d.sol[c]).length} SKUs`).join(' · ')}}
   if(k==='sl2'){const d=Engine.parseSL(rows);if(d.combinado)return {data:d,warn:true,info:'trae los dos CD sumados (no tiene la columna Codigo Centro). No la uso: las entregas por canal quedan con los valores anteriores. Descárgala con Codigo Centro en las filas, o una por cada CD.'};
     return {data:d,info:Object.keys(d.canal).filter(c=>CENTROS[c]).map(c=>`${nomC(c)}: ${Object.keys(d.canal[c]).length} SKUs`).join(' · ')}}
 }
 function renderFiles(){
-  const order=['zexi','tms','prev','sl1','sl2','fc'];
+  const order=['zexi','tms','prev','sl1','sl2','fc','cli'];
   $('flist').innerHTML=order.map(k=>{const f=files[k];const need=k==='zexi'||k==='prev';
     if(!f&&k==='fc'){const g=Object.entries(FC_GUARDADO).filter(([c])=>CENTROS[c]);
       return `<div class="fitem ${g.length?'ok':''}"><span>${g.length?'✓':'–'}</span><b>${TIPOS[k]} (mensual)</b><span>${g.length?'Usando el guardado: '+g.map(([c,x])=>`${nomC(c)} mes ${x.mes||'?'} (cargado ${esc(x.cargado||'')})`).join(' · ')+'. Súbelo solo cuando cambie el mes.':'No hay pronóstico guardado: Villavicencio usa el FC del Excel y Yopal queda sin FC. Súbelo una vez al mes.'}</span></div>`}
+    if(!f&&k==='cli')return `<div class="fitem ${CLI_GUARDADO?'ok':''}"><span>${CLI_GUARDADO?'✓':'–'}</span><b>${TIPOS[k]} (ocasional)</b><span>${CLI_GUARDADO?`Usando el guardado: ${f0.format(Object.keys(CLI_GUARDADO.map).length)} clientes (cargado ${esc(CLI_GUARDADO.cargado||'')}).`:'No hay maestro guardado: los clientes se verán solo con su código.'}</span></div>`;
     if(!f)return `<div class="fitem ${need?'err':''}"><span>${need?'✗':'–'}</span><b>${TIPOS[k]}</b><span>${need?'Falta (obligatorio)':'No cargado (opcional)'}</span></div>`;
     return `<div class="fitem ${f.warn?'warn':'ok'}"><span>${f.warn?'!':'✓'}</span><b>${TIPOS[k]}</b><span>${esc(f.name)} — ${esc(f.info)}</span></div>`}).join('')+
     extras.map(x=>`<div class="fitem err"><span>✗</span><b>${esc(x.name)}</b><span>${esc(x.info)}</span></div>`).join('');
@@ -778,9 +781,11 @@ $('fAll').onchange=e=>{addFiles([...e.target.files]);e.target.value=''};
 const dz=$('dAll');['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('over')}));
 ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('over')}));
 dz.addEventListener('drop',e=>addFiles([...e.dataTransfer.files]));
-let pending=null,FC_GUARDADO={};
+let pending=null,FC_GUARDADO={},CLI_GUARDADO=null;
+const CLI_COL=()=>CENTROS[CODS[0]].col;
 async function cargarFCGuardado(){
   if(!FB)return;
+  try{const m=await getDoc(doc(FB,CLI_COL(),'cmeta'));if(m.exists()){const b=m.data(),parts=await Promise.all(Array.from({length:b.chunks},(_,i)=>getDoc(doc(FB,CLI_COL(),'cm'+i))));const map={};parts.forEach(p=>{if(p.exists())Object.assign(map,JSON.parse(p.data().data))});CLI_GUARDADO={cargado:b.cargado,map}}}catch(e){}
   for(const c of CODS){try{const d=await getDoc(doc(FB,CENTROS[c].col,'fc'));if(d.exists()){const b=d.data();FC_GUARDADO[c]={mes:b.mes,cargado:b.cargado,fc:JSON.parse(b.data)}}}catch(e){}}
   renderFiles();
 }
@@ -807,15 +812,17 @@ async function preview(){
   }
   pending=Object.keys(out).length?out:null;renderCen();
   if(!pending){$('bPub').disabled=true;msg('El ZEXI no trae inventario de ningún centro configurado.',true);return}
-  if(pending[CENTRO]){CLIENTES=pending[CENTRO].clientes||null;setData(pending[CENTRO],'vista previa sin publicar');$('stale').innerHTML='<span class="badge">Vista previa</span>'}
+  if(pending[CENTRO]){CLIENTES=conNombres(pending[CENTRO].clientes)||null;setData(pending[CENTRO],'vista previa sin publicar');$('stale').innerHTML='<span class="badge">Vista previa</span>'}
   msg(`Listo para publicar: ${Object.keys(pending).map(nomC).join(' y ')}. Estás viendo ${nomC(CENTRO)}; revisa y publica.`+(solo?' (Preventa en formato del Excel: solo se publica este centro.)':''));
   $('bPub').disabled=!(FB&&puedeEditar());
   if(!FB)msg('Vista previa local: falta configurar Firebase para poder publicar.',true);
   else if(!USER)msg('Entra con tu correo y contraseña para publicar.',true);
   else if(!puedeEditar())msg('Tu correo no está autorizado para publicar.',true);
 }
+function conNombres(cl){if(!cl)return cl;const NM=files.cli?files.cli.data:(CLI_GUARDADO?CLI_GUARDADO.map:{}),o={};for(const k in cl)o[k]=cl[k].map(x=>[x[0],x[1],x[2],x[3],x[4]||NM[String(x[0])]||'']);return o}
 function chunkClientes(cl){
   const out=[];let cur={},size=0;
+  cl=conNombres(cl);
   for(const sku in (cl||{})){const v=cl[sku].slice(0,60),s=JSON.stringify(v).length;if(size+s>250000&&size){out.push(cur);cur={};size=0}cur[sku]=v;size+=s}
   if(size)out.push(cur);return out;
 }
@@ -841,6 +848,9 @@ $('bPub').onclick=async()=>{
       await batch.commit();ok.push(nomC(c));
     }catch(e){bad.push(nomC(c)+(e&&e.code==='permission-denied'?' (Firebase no dejó guardar: revisa que las reglas incluyan '+col+')':' ('+(e.code||e.message||e)+')'))}
   }
+  if(files.cli&&ok.length){try{const ents=Object.entries(files.cli.data),n=Math.ceil(ents.length/5000),bt=writeBatch(FB),cargado=Object.values(pending)[0].generado;
+    for(let i=0;i<n;i++)bt.set(doc(FB,CLI_COL(),'cm'+i),{data:JSON.stringify(Object.fromEntries(ents.slice(i*5000,(i+1)*5000)))});
+    bt.set(doc(FB,CLI_COL(),'cmeta'),{chunks:n,cargado,n:ents.length});await bt.commit();CLI_GUARDADO={cargado,map:files.cli.data}}catch(e){bad.push('maestro de clientes ('+(e.code||e.message)+')')}}
   curVersion=null;for(const k in TSO_CACHE)delete TSO_CACHE[k];
   if(files.fc)for(const c of Object.keys(pending))if(files.fc.data.fc[c])FC_GUARDADO[c]={mes:files.fc.data.mes,cargado:pending[c].generado,fc:files.fc.data.fc[c]};
   if(bad.length){msg((ok.length?'Publicado: '+ok.join(' y ')+'. ':'')+'No se pudo publicar: '+bad.join('; '),true);$('bPub').disabled=false}

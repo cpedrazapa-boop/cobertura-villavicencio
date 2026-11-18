@@ -217,6 +217,19 @@
     return { tipo: 'fc', mes, semanas: wcols.map(j => semRow[j]).filter(v => v != null), fc: out };
   }
 
+  /* ---------- Maestro de clientes (código -> nombre) ---------- */
+  function parseClientes(rows) {
+    const h = findHeader(rows, ['cliente', 'nombrecliente']);
+    if (h < 0) throw new Error('Clientes: no encontré las columnas CLIENTE y NOMBRECLIENTE');
+    const cC = colIdx(rows[h], 'cliente'), cN = colIdx(rows[h], 'nombrecliente'), out = {};
+    for (let i = h + 1; i < rows.length; i++) {
+      const r = rows[i]; if (!r || r[cC] == null) continue;
+      const k = String(r[cC]).trim().replace(/\.0+$/, ''), n = r[cN] == null ? '' : String(r[cN]).trim();
+      if (k && n && !(k in out)) out[k] = n;
+    }
+    return out;
+  }
+
   /* ---------- Reconocer qué archivo es ---------- */
   function classify(rows) {
     if (findHeader(rows, ['material', 'alm']) >= 0) return 'zexi';
@@ -224,6 +237,7 @@
     if (findHeader(rows, ['shipment destination location id', 'sku', 'hl']) >= 0 || findHeader(rows, ['llave', 'hl']) >= 0) return 'tms';
     if (findHeader(rows, ['cd', 'sku', 'tipopedido']) >= 0) return 'prev';
     for (let i = 0; i < Math.min(rows.length, 10); i++) if ((rows[i] || []).some(v => /preventa\s*d\+[13]/i.test(String(v ?? '')))) return 'prev';
+    if (findHeader(rows, ['cliente', 'nombrecliente']) >= 0) return 'cli';
     if (findHeader(rows, ['codigo centro', 'sku', 'volumen solicitado hl']) >= 0) return 'sl1';
     if (findHeader(rows, ['clase documento']) >= 0) return 'sl2';
     return null;
@@ -320,6 +334,6 @@
     return { name: n, rows: XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: true, defval: null }) };
   }
 
-  const api = { COLUMNS, parseZexi, parseTms, parsePreventa, parseSL, parseFC, abcDe, classify, compute, pickSheet, weeknum, norm, num, key };
+  const api = { COLUMNS, parseZexi, parseTms, parsePreventa, parseSL, parseFC, parseClientes, abcDe, classify, compute, pickSheet, weeknum, norm, num, key };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.Engine = api;
 })(typeof self !== 'undefined' ? self : this);
