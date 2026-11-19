@@ -216,6 +216,7 @@ table thead th{background:var(--card)}
 .tt td,.tt th{white-space:nowrap;padding:5px 6px}.tt td:nth-child(2){max-width:170px;overflow:hidden;text-overflow:ellipsis}
 .brand{flex-direction:column;align-items:flex-start;gap:4px}.logoBox{background:#fff;border-radius:12px;padding:8px 12px;margin-bottom:10px;box-shadow:0 4px 14px rgba(0,0,0,.25)}.logoBox img{display:block;height:44px;width:auto}
 @media (max-width:980px){.brand{flex-direction:row;align-items:center;gap:10px}.logoBox{margin:0;padding:5px 8px}.logoBox img{height:30px}.brand .bs{display:none}}
+.seg{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px}.seg button{border:0;background:transparent;padding:6px 12px;border-radius:7px;font-weight:600;color:var(--mute)}.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(16,24,40,.12)}
 </style>
 </head>
 <body data-modo="ver">
@@ -280,8 +281,8 @@ table thead th{background:var(--card)}
 <div id="toast"></div>
 <div id="tip"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="centros.js?v=20261118b"></script>
-<script src="engine.js?v=20261118b"></script>
+<script src="centros.js?v=20261119a"></script>
+<script src="engine.js?v=20261119a"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -322,7 +323,7 @@ async function loadChunks(meta){
   const all=[];for(const p of parts){const b=p.exists()?p.data():null;if(!b||b.version!==meta.version)return false;all.push(...JSON.parse(b.rows))}
   CLIENTES=null;
   if(meta.kchunks){try{const ks=await Promise.all(Array.from({length:meta.kchunks},(_,i)=>getDoc(doc(FB,COL,'k'+i))));CLIENTES={};for(const k of ks){const b=k.exists()?k.data():null;if(b&&b.version===meta.version)Object.assign(CLIENTES,JSON.parse(b.data))}}catch(e){CLIENTES=null}}
-  setData({columns:meta.columns,rows:all,d1day:meta.d1day||null,dia:meta.dia||null,capacidad:meta.capacidad||null,semana:meta.semana,centro:meta.centro,generado:meta.generado},meta.por?'por '+meta.por:'');
+  setData({columns:meta.columns,rows:all,d1day:meta.d1day||null,dias:meta.dias||null,dia:meta.dia||null,capacidad:meta.capacidad||null,semana:meta.semana,centro:meta.centro,generado:meta.generado},meta.por?'por '+meta.por:'');
   return true;
 }
 const CENTROS=window.CENTROS||{AV19:{nombre:'Villavicencio',col:'cobertura',master:'master.json',data:'data.json',cap:36554}};
@@ -566,7 +567,8 @@ function renderSku(){
        <div style="margin-top:16px;font-size:12px;display:flex;justify-content:space-between"><span>Entregado vs FC acumulado (MTD ${f0.format(fcm)} HL)</span><b class="${semCump(pc)}" style="padding:1px 6px;border-radius:4px">${f0.format(pc*100)} %</b></div>
        <div class="prog"><span style="width:${Math.min(100,pc*100)}%"></span></div>
        <div style="font-size:12px;color:var(--mute)">FC del mes: ${f0.format(fct)} HL · faltan ${f0.format(Math.max(0,fct-ent))} HL · al ritmo actual cierra en ${f0.format(ent/dia*30)} HL (${f0.format(dv(ent/dia*30,fct)*100)} % del FC)</div></div>
-     <div class="card viz full"><h4>¿Quién se lleva este producto?</h4><div class="cs">Clientes con pedidos de este SKU en la preventa cargada${D&&D.d1day?' (desde el día '+D.d1day+')':''}.</div>${clientesHtml(SKU)}</div>
+     <div class="card viz full"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap"><div><h4>¿Quién se lleva este producto?</h4><div class="cs">${PREV_MODO==='d1'?`Clientes con pedidos de este SKU para mañana: preventa D+1${D&&D.d1day?' (día '+D.d1day+')':''}.`:`Clientes con pedidos de este SKU en toda la preventa cargada: D+3${D&&D.dias&&D.dias.length?' (días '+D.dias[0]+' a '+D.dias[D.dias.length-1]+')':D&&D.d1day?' (desde el día '+D.d1day+')':''}.`}</div></div>
+       <div class="seg" id="prevSeg"><button data-p="d1" class="${PREV_MODO==='d1'?'on':''}">Preventa D+1</button><button data-p="d3" class="${PREV_MODO==='d3'?'on':''}">Preventa D+3</button></div></div>${clientesHtml(SKU)}</div>
      <div class="card full"><h4>Todos los datos del SKU</h4><div class="cs">${esc(r.Marca)} · ${esc(r.Lines)} · ${esc(r.tipo)}</div><div class="kv">${kv.map(([k,v])=>`<div><span>${k}</span><b>${esc(v)}</b></div>`).join('')}</div></div>
     </div>`;
   $('skuIn').onchange=e=>{const m=String(e.target.value).split(' · ')[0].trim();if(rows.some(x=>String(x.Material)===m))openSku(m)};
@@ -635,13 +637,18 @@ async function cargarNombres(){
     if(m.exists()){const b=m.data(),ps=await Promise.all(Array.from({length:b.chunks},(_,i)=>getDoc(doc(FB,col,'cm'+i))));const map={};ps.forEach(p=>{if(p.exists())Object.assign(map,JSON.parse(p.data().data))});NOMBRES=map;if(VIEW==='sku')render()}}
   catch(e){}finally{nombresPidiendo=false}
 }
+let PREV_MODO='d1';try{PREV_MODO=localStorage.getItem('cov_prev')||'d1'}catch(e){}
+document.addEventListener('click',e=>{const b=e.target.closest('#prevSeg button');if(!b)return;PREV_MODO=b.dataset.p;try{localStorage.setItem('cov_prev',PREV_MODO)}catch(e){};render()});
 function clientesHtml(sku){
   if(!CLIENTES)return '<div class="empty">No hay datos de clientes en la última publicación. Se llenan al publicar con la preventa en crudo (archivo de surtido).</div>';
-  const L=CLIENTES[String(sku)];if(!L||!L.length)return '<div class="empty">Este SKU no tiene pedidos en la preventa cargada.</div>';
+  let L=CLIENTES[String(sku)];if(!L||!L.length)return '<div class="empty">Este SKU no tiene pedidos en la preventa cargada.</div>';
+  if(PREV_MODO==='d1'){if(L[0].length<6)return '<div class="empty">La última publicación no separa D+1 por cliente. Vuelve a publicar desde el cargador y aparecerá.</div>';
+    L=L.filter(x=>x[5]>0).map(x=>[x[0],x[5],x[2],x[3],x[4],x[5]]).sort((a,b)=>b[1]-a[1]);
+    if(!L.length)return '<div class="empty">Este SKU no tiene pedidos para mañana (D+1). Cambia a D+3 para ver toda la preventa.</div>';}
   if(!NOMBRES&&L.some(x=>!x[4]))cargarNombres();
   const nom=x=>x[4]||(NOMBRES&&NOMBRES[String(x[0])])||'';
   const tot=L.reduce((a,x)=>a+x[1],0),top=L.slice(0,15),mx=top[0][1]||1,t5=L.slice(0,5).reduce((a,x)=>a+x[1],0);
-  return `<div class="legend"><span>${L.length} clientes · ${f1.format(tot)} HL en preventa · los 5 primeros llevan el ${f0.format(dv(t5,tot)*100)} %</span><span><i style="background:var(--tat)"></i>TAT (ZCP1)</span><span><i style="background:var(--ka)"></i>KA (ZCP6)</span></div>
+  return `<div class="legend"><span>${L.length} clientes · ${f1.format(tot)} HL en preventa ${PREV_MODO==='d1'?'D+1':'D+3'} · los 5 primeros llevan el ${f0.format(dv(t5,tot)*100)} %</span><span><i style="background:var(--tat)"></i>TAT (ZCP1)</span><span><i style="background:var(--ka)"></i>KA (ZCP6)</span></div>
    <div class="hb">${top.map(x=>{const [c,hl,docs,tp]=x,nm=nom(x);return `<div class="lab" style="cursor:default" title="Cliente ${esc(c)}">${nm?esc(nm)+' <span style="color:var(--mute)">· '+esc(c)+'</span>':'Cliente '+esc(c)}</div><div class="trk" style="width:${hl/mx*100}%"><span style="flex:1;background:${tp==='ZCP6'?'var(--ka)':'var(--tat)'}" data-tip="<b>${esc(nm||'Cliente '+c)}</b><br>Código ${esc(c)}<br>${f1.format(hl)} HL · ${docs} pedido${docs===1?'':'s'} · ${tp==='ZCP6'?'KA':'TAT'}"></span></div><div class="val">${f1.format(hl)} HL · ${f0.format(dv(hl,tot)*100)} %</div>`}).join('')}</div>
    ${L.length>15?`<div class="cs" style="margin-top:8px">Y ${L.length-15} clientes más con ${f1.format(tot-top.reduce((a,x)=>a+x[1],0))} HL.</div>`:''}`;
 }
@@ -833,7 +840,7 @@ async function preview(){
   else if(!USER)msg('Entra con tu correo y contraseña para publicar.',true);
   else if(!puedeEditar())msg('Tu correo no está autorizado para publicar.',true);
 }
-function conNombres(cl){if(!cl)return cl;const NM=files.cli?files.cli.data:(CLI_GUARDADO?CLI_GUARDADO.map:{}),o={};for(const k in cl)o[k]=cl[k].map(x=>[x[0],x[1],x[2],x[3],x[4]||NM[String(x[0])]||'']);return o}
+function conNombres(cl){if(!cl)return cl;const NM=files.cli?files.cli.data:(CLI_GUARDADO?CLI_GUARDADO.map:{}),o={};for(const k in cl)o[k]=cl[k].map(x=>[x[0],x[1],x[2],x[3],x[4]||NM[String(x[0])]||'',x[5]]);return o}
 async function guardarClientes(){
   const ents=Object.entries(files.cli.data),n=Math.ceil(ents.length/5000),bt=writeBatch(FB);
   const now=new Date(),pad=x=>String(x).padStart(2,'0'),cargado=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
@@ -865,7 +872,7 @@ $('bPub').onclick=async()=>{
        if(!ya||$('tsoRep').checked){batch.set(tref,{fecha,hora,data:JSON.stringify(foto)});tsoMsg.push(`${nomC(c)}: foto TSO del ${fecha} guardada (${hora})`)}
        else tsoMsg.push(`${nomC(c)}: la foto TSO de hoy ya estaba (${ya.hora||'primera publicación'}), no se cambió`);}
       if(files.fc&&files.fc.data.fc[c])batch.set(doc(FB,col,'fc'),{mes:files.fc.data.mes||null,cargado:P.generado,data:JSON.stringify(files.fc.data.fc[c])});
-      batch.set(doc(FB,col,'meta'),{version,chunks:n,kchunks:kc.length,d1day:P.d1day||null,dia:P.dia||null,capacidad:P.capacidad||null,columns:P.columns,semana:P.semana,centro:c,generado:P.generado,por:USER.displayName||USER.email,stats:P.stats});
+      batch.set(doc(FB,col,'meta'),{version,chunks:n,kchunks:kc.length,d1day:P.d1day||null,dias:P.dias||null,dia:P.dia||null,capacidad:P.capacidad||null,columns:P.columns,semana:P.semana,centro:c,generado:P.generado,por:USER.displayName||USER.email,stats:P.stats});
       await batch.commit();ok.push(nomC(c));
     }catch(e){bad.push(nomC(c)+(e&&e.code==='permission-denied'?' (Firebase no dejó guardar: revisa que las reglas incluyan '+col+')':' ('+(e.code||e.message||e)+')'))}
   }
