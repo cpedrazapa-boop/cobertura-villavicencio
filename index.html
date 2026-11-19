@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cobertura de Inventarios Villavicencio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f6f7f9;--card:#fff;--ink:#1b1f24;--mute:#667085;--line:#e4e7ec;--acc:#1f5fbf;--red:#c0362c;--redbg:#fdecea;--amb:#b26a00;--ambbg:#fff4e0;--grn:#1d7a46;--grnbg:#e7f6ed}
 @media (prefers-color-scheme:dark){:root{--bg:#111418;--card:#1a1e24;--ink:#e8eaed;--mute:#98a2b3;--line:#2c323a;--acc:#6aa3ff;--red:#ff7b70;--redbg:#3a1d1b;--amb:#ffb648;--ambbg:#3a2c14;--grn:#5fd08f;--grnbg:#16301f}}
@@ -155,6 +155,54 @@ td.b{font-weight:700}
 .tsox{display:flex;gap:4px;font-size:10px;color:var(--mute)}.tsox span{flex:1;text-align:center}
 .tsom{position:absolute;left:0;right:0;border-top:2px dashed #1f3a5f;pointer-events:none}
 .tsom i{position:absolute;right:0;top:-16px;font-size:10px;font-style:normal;color:var(--mute);background:var(--card);padding:0 3px}
+
+/* ===== Identidad Bavaria + Inicio ===== */
+:root{--acc:#d50f25;--brand:#e30613;--num:'Manrope',Inter,system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root{--acc:#ff5a68}}
+nav.tabs button.on{background:rgba(227,6,19,.18);box-shadow:inset 3px 0 0 #ff3344}
+nav.tabs button.on svg{color:#ff5a68}
+.side .cen a.on{color:#b30018}
+button.pri{background:var(--brand);border-color:var(--brand)}button.pri:hover{background:#c00010;border-color:#c00010}
+.sfoot a{color:#ff7a85}
+#sub:before{background:#22c55e}
+.kpi .v,.tile .n,.hero-n,.hk .v{font-family:var(--num);font-weight:800;letter-spacing:-.03em}
+.kpi:before{background:var(--brand)}
+.home{display:grid;gap:14px;padding:0 28px}
+.hl{background:linear-gradient(120deg,#0d1726 0%,#1b2f4d 100%);color:#e8eef7;border-radius:16px;padding:22px 26px;display:flex;gap:18px;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:var(--sh)}
+.hl .hlt{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#ff7a85;font-weight:700}
+.hl .hls{font-size:22px;font-weight:600;line-height:1.35;margin-top:4px;max-width:880px}
+.hl .hls b{color:#fff}
+.hl .hlb{display:flex;gap:8px;flex-wrap:wrap}
+.chipA{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;background:rgba(255,255,255,.08);font-size:13px;color:#dfe7f2;cursor:pointer;border:1px solid rgba(255,255,255,.08)}
+.chipA:hover{background:rgba(255,255,255,.14)}
+.chipA i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.hks{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.hk{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--sh);display:flex;flex-direction:column;gap:6px;min-width:0}
+.hk .l{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--mute);font-weight:600}
+.hk .v{font-size:30px;line-height:1.05}
+.hk .row{display:flex;justify-content:space-between;align-items:flex-end;gap:8px}
+.dl{font-size:12px;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap}
+.dl.up{background:#e7f6ed;color:#1d7a46}.dl.dn{background:#fdecea;color:#c0362c}.dl.nt{background:var(--bg);color:var(--mute)}
+@media (prefers-color-scheme:dark){.dl.up{background:#16301f;color:#5fd08f}.dl.dn{background:#3a1d1b;color:#ff7b70}}
+.hk .s{font-size:12px;color:var(--mute)}
+.spk{width:92px;height:30px;flex:none}
+.hg{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:14px}
+.hg3{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.hc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--sh);min-width:0}
+.hc h4{margin:0;font-size:15px}.hc .cs{color:var(--mute);font-size:12px;margin:2px 0 10px}
+.lst{width:100%;border-collapse:collapse;font-size:13px}
+.lst td{padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+.lst tr{cursor:pointer}.lst tr:hover td{background:color-mix(in srgb,var(--acc) 5%,transparent)}
+.lst td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.lst .nm{font-weight:600;display:block;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lst .sb{font-size:11.5px;color:var(--mute)}
+.pl{display:inline-block;padding:3px 9px;border-radius:99px;font-size:12px;font-weight:700}
+.pl.r{background:var(--redbg);color:var(--red)}.pl.a{background:var(--ambbg);color:var(--amb)}.pl.g{background:var(--grnbg);color:var(--grn)}
+.gauge{display:flex;flex-direction:column;align-items:center}
+.gauge .lg2{display:flex;gap:14px;font-size:12px;color:var(--mute);margin-top:4px}
+.gauge .lg2 i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+@media (max-width:1200px){.hks{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:980px){.home{padding:0 16px}.hks{grid-template-columns:repeat(2,minmax(0,1fr))}.hg,.hg3{grid-template-columns:1fr}.hl .hls{font-size:18px}}
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;display:none}
 
 /* ===================== Diseño premium ===================== */
@@ -217,6 +265,15 @@ table thead th{background:var(--card)}
 .brand{flex-direction:column;align-items:flex-start;gap:4px}.logoBox{background:#fff;border-radius:12px;padding:8px 12px;margin-bottom:10px;box-shadow:0 4px 14px rgba(0,0,0,.25)}.logoBox img{display:block;height:44px;width:auto}
 @media (max-width:980px){.brand{flex-direction:row;align-items:center;gap:10px}.logoBox{margin:0;padding:5px 8px}.logoBox img{height:30px}.brand .bs{display:none}}
 .seg{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px}.seg button{border:0;background:transparent;padding:6px 12px;border-radius:7px;font-weight:600;color:var(--mute)}.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(16,24,40,.12)}
+
+/* Bavaria: overrides finales */
+nav.tabs button.on{background:rgba(227,6,19,.18);box-shadow:inset 3px 0 0 #ff3344}
+nav.tabs button.on svg{color:#ff5a68}
+.side .cen a.on{color:#b30018}
+.kpi:before{background:var(--brand)}
+.kpi.r:before{background:var(--red)}.kpi.a:before{background:var(--amb)}.kpi.g:before{background:var(--grn)}
+.lst td{text-align:left}.lst td.n{text-align:right}
+.sfoot a{color:#ff7a85}
 </style>
 </head>
 <body data-modo="ver">
@@ -227,6 +284,7 @@ table thead th{background:var(--card)}
   <div class="cen" id="cen"></div>
   <div class="slab">Vistas</div>
   <nav class="tabs" id="tabs">
+  <button data-v="inicio"><svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>Resumen del día</span></button>
   <button data-v="ocu"><svg viewBox="0 0 24 24"><path d="M3 21V8l9-5 9 5v13"/><path d="M7 21v-8h10v8"/><path d="M7 17h10"/></svg><span>Ocupación bodega</span></button>
   <button data-v="d1"><svg viewBox="0 0 24 24"><path d="M3 7h11v9H3z"/><path d="M14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg><span>Cobertura D+1</span></button>
   <button data-v="d3"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M8 15h2M12 15h2M16 15h1"/></svg><span>Cobertura D+3</span></button>
@@ -346,7 +404,7 @@ async function init(){
     clearTimeout(timer);$('stale').innerHTML='';
     if(!snap.exists()){if(!D)loadStatic('versión base del Excel');return}
     const meta=snap.data();if(meta.version===curVersion)return;
-    if(await loadChunks(meta)){for(const k in TSO_CACHE)delete TSO_CACHE[k];if(curVersion)toast('Datos actualizados');curVersion=meta.version}
+    if(await loadChunks(meta)){for(const k in TSO_CACHE)delete TSO_CACHE[k];for(const k in HIST_CACHE)delete HIST_CACHE[k];if(curVersion)toast('Datos actualizados');curVersion=meta.version}
   },err=>{clearTimeout(timer);if(!D)loadStatic('versión base (no se pudo leer Firebase)')});
 }
 function puedeEditar(){return USER&&EDITORES.map(e=>e.toLowerCase()).includes((USER.email||'').toLowerCase())}
@@ -398,11 +456,11 @@ function renderData(){
 }
 
 /* ---------- Vistas ---------- */
-let VIEW='ocu',copyData={h:[],r:[]};
-try{const h=location.hash.slice(1);if(['ocu','d1','d3','canal','tso','rot','sku','data'].includes(h))VIEW=h}catch(e){}
+let VIEW='inicio',copyData={h:[],r:[]};
+try{const h=location.hash.slice(1);if(['inicio','ocu','d1','d3','canal','tso','rot','sku','data'].includes(h))VIEW=h}catch(e){}
 // Enlace de una sola vista: index.html?centro=AV19&vista=canal (oculta las demás pestañas)
-let SOLO=null;try{const v=(new URLSearchParams(location.search).get('vista')||'').toLowerCase();if(['ocu','d1','d3','canal','tso','rot','sku','data'].includes(v)&&document.body.dataset.modo!=='cargar'){SOLO=v;VIEW=v}}catch(e){}
-if(SOLO){document.getElementById('tabs').style.display='none';const t={ocu:'Ocupación bodega',d1:'Cobertura D+1',d3:'Cobertura D+3',canal:'Volumen entregado por canal',tso:'TSO',rot:'Rotación por SKU',sku:'Detalle por SKU',data:'Tabla completa'}[SOLO];
+let SOLO=null;try{const v=(new URLSearchParams(location.search).get('vista')||'').toLowerCase();if(['inicio','ocu','d1','d3','canal','tso','rot','sku','data'].includes(v)&&document.body.dataset.modo!=='cargar'){SOLO=v;VIEW=v}}catch(e){}
+if(SOLO){document.getElementById('tabs').style.display='none';const t={inicio:'Resumen del día',ocu:'Ocupación bodega',d1:'Cobertura D+1',d3:'Cobertura D+3',canal:'Volumen entregado por canal',tso:'TSO',rot:'Rotación por SKU',sku:'Detalle por SKU',data:'Tabla completa'}[SOLO];
   setTimeout(()=>{try{$('h1').textContent=CEN.nombre+' · '+CENTRO;document.title=t+' · '+CEN.nombre;$('cen').querySelectorAll('a').forEach(a=>{a.href=a.href.split('?')[0]+'?centro='+a.href.split('centro=')[1].split('&')[0].split('#')[0]+'&vista='+SOLO})}catch(e){}},0)}
 const N=v=>+v||0, dv=(a,b)=>b?a/b:0;
 const f0=new Intl.NumberFormat('es-CO',{maximumFractionDigits:0}),f1=new Intl.NumberFormat('es-CO',{minimumFractionDigits:1,maximumFractionDigits:1});
@@ -709,16 +767,106 @@ async function renderTSO(){
   copyData={h:['SKU','Descripción','FCST MTD','STOCK OUT','% TSO MTD'],r:tMes.map(x=>[x.k,x.d,Math.round(x.fc),Math.round(x.so),Math.round(x.pct*1000)/10+'%'])};
   $('foot').textContent='Stock out del SKU = FCST día − HL en piso, cuando el piso no alcanza (si alcanza, 0). TSO día = stock out ÷ FCST del día. TSO mes = stock out acumulado ÷ FCST acumulado de los días con foto. La foto del día es la primera publicación de ese día (la de la mañana).';
 }
+
+/* ---------- Inicio: resumen del día ---------- */
+const HIST_CACHE={};
+function kpisDe(rs){ // indicadores del CD con los datos cargados
+  const s=k=>rs.reduce((a,r)=>a+N(r[k]),0),cap=capacidad();
+  const piso=s('Inv. Piso'),cal=s('Inv. Calidad'),blq=s('Inv. Bloqueo'),tra=s('Inv. Transito'),fcd=s('FC Dia'),ent=s('Volumen Entregado'),fcm=s('FC MES');
+  let so=0,fc=0;rs.forEach(r=>{const f=N(r['FC Dia']),p=N(r['Inv. Piso']);fc+=f;so+=Math.max(0,f-p)});
+  const enR=rs.filter(r=>N(r['FC Dia'])>0).map(derive).filter(r=>r.tot1<2).length;
+  return {ocu:cap?(piso+cal+blq)/cap:null,ocuT:cap?(piso+cal+blq+tra)/cap:null,piso,tra,dc:dv(piso,fcd),tso:dv(so,fc),tsoHl:so,cump:dv(ent,fcm),ent,riesgo:enR};
+}
+async function cargarHist(){ // últimos 14 días: hist_ (al publicar) y, de respaldo, las fotos TSO
+  const key=COL+fechaDatos();if(HIST_CACHE[key])return HIST_CACHE[key];
+  const out={};const base=new Date(fechaDatos()+'T12:00:00');
+  if(FB){const fechas=Array.from({length:14},(_,i)=>{const d=new Date(base);d.setDate(d.getDate()-i);return ymd(d)});
+    const ds=await Promise.all(fechas.map(f=>getDoc(doc(FB,COL,'hist_'+f)).catch(()=>null)));
+    ds.forEach((d,i)=>{if(d&&d.exists())out[fechas[i]]=d.data()});
+    const meses=[...new Set(fechas.map(f=>f.slice(0,7)))];
+    for(const m of meses){const t=await cargarMes(m);for(const f in t){if(!fechas.includes(f))continue;let so=0,fc=0,p=0;for(const [k,[pi,fd]] of Object.entries(t[f])){p+=pi;fc+=fd;so+=Math.max(0,fd-pi)}
+      out[f]=Object.assign({piso:p,tso:dv(so,fc),tsoHl:so},out[f]||{})}}
+  }
+  out[fechaDatos()]=Object.assign({},out[fechaDatos()]||{},kpisDe(rows),{tso:(out[fechaDatos()]&&out[fechaDatos()].tso!=null)?out[fechaDatos()].tso:kpisDe(rows).tso});
+  HIST_CACHE[key]=out;return out;
+}
+function spark(vals,color){
+  const v=vals.filter(x=>x!=null&&isFinite(x));if(v.length<2)return '<svg class="spk"></svg>';
+  const mn=Math.min(...v),mx=Math.max(...v),W=92,H=30,p=3,X=i=>p+i*(W-2*p)/(v.length-1),Y=x=>H-p-(mx===mn?0.5:(x-mn)/(mx-mn))*(H-2*p);
+  const pts=v.map((x,i)=>X(i).toFixed(1)+','+Y(x).toFixed(1)).join(' ');
+  return `<svg class="spk" viewBox="0 0 ${W} ${H}"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${X(v.length-1)}" cy="${Y(v[v.length-1])}" r="3" fill="${color}" stroke="var(--card)" stroke-width="1.5"/></svg>`;
+}
+function deltaHtml(cur,prev,fmtD,bueno,eps=1e-9){ // bueno: 'up' si subir es bueno, 'down' si bajar es bueno
+  if(prev==null||cur==null||!isFinite(prev))return '<span class="dl nt">sin dato de ayer</span>';
+  const d=cur-prev;if(Math.abs(d)<eps)return '<span class="dl nt">= igual que ayer</span>';
+  const ok=(d>0&&bueno==='up')||(d<0&&bueno==='down');
+  return `<span class="dl ${ok?'up':'dn'}">${d>0?'▲':'▼'} ${fmtD(Math.abs(d))}</span>`;
+}
+function gaugeSvg(a,b){
+  const A=Math.max(0,Math.min(1,a||0)),B=Math.max(0,Math.min(1,b||0));
+  return `<svg viewBox="0 0 300 175" width="100%" style="max-width:340px"><path d="M30 155 A120 120 0 0 1 270 155" fill="none" stroke="var(--line)" stroke-width="22"/>
+   <path d="M30 155 A120 120 0 0 1 270 155" fill="none" stroke="#b5d4f4" stroke-width="22" pathLength="100" stroke-dasharray="${B*100} 100"/>
+   <path d="M30 155 A120 120 0 0 1 270 155" fill="none" stroke="#2a78d6" stroke-width="22" pathLength="100" stroke-dasharray="${A*100} 100"/>
+   <text x="150" y="130" text-anchor="middle" style="font:800 46px var(--num);fill:var(--ink)">${a==null?'—':f0.format(a*100)+' %'}</text>
+   <text x="150" y="156" text-anchor="middle" style="font-size:12px;fill:var(--mute)">ocupación en piso</text></svg>`;
+}
+async function renderInicio(){
+  $('kpis').innerHTML='';
+  const now=kpisDe(rows),dia=diaMes(),cap=capacidad();
+  // listas
+  const conFc=rows.filter(r=>N(r['FC Dia'])>0).map(derive);
+  const riesgo=conFc.filter(r=>N(r['FC Dia'])>=5).sort((a,b)=>a.tot1-b.tot1).slice(0,6);
+  const quieto=rows.map(r=>Object.assign({},r,rotacion(r,dia))).filter(r=>(r.rot==='Baja'||r.rot==='Sin movimiento')&&r.inv>0).sort((a,b)=>b.inv-a.inv).slice(0,6);
+  const tms=rows.filter(r=>N(r.TMS)>0).sort((a,b)=>String(a['Fecha Arribo TMS']||'9').localeCompare(String(b['Fecha Arribo TMS']||'9'))||N(b.TMS)-N(a.TMS)).slice(0,6);
+  const bajo2=conFc.filter(r=>r.tot1<2).length,neg=conFc.filter(r=>r.tot1<0).length,inm=quieto.length?rows.map(r=>Object.assign({},r,rotacion(r,dia))).filter(r=>r.rot==='Baja'||r.rot==='Sin movimiento').reduce((a,r)=>a+r.inv,0):0;
+  const fr=[];
+  if(now.ocu!=null)fr.push(`La bodega está al <b>${f0.format(now.ocu*100)} %</b>${now.ocuT!=null?` (${f0.format(now.ocuT*100)} % con tránsitos)`:''}`);
+  fr.push(bajo2?`<b>${bajo2} SKU${bajo2===1?'':'s'}</b> con menos de 2 días de cobertura`:'ningún SKU por debajo de 2 días de cobertura');
+  if(inm>0)fr.push(`<b>${f0.format(inm)} HL</b> de inventario con baja rotación`);
+  const hoy=fechaDatos(),fechaTxt=new Date(hoy+'T12:00:00').toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long'});
+  const lstR=riesgo.map(r=>{const c=r.tot1<0?'r':r.tot1<2?'r':r.tot1<4?'a':'g';return `<tr data-sku="${esc(r.Material)}"><td><span class="nm">${esc(r.Descripcion)}</span><span class="sb">${esc(r.Material)} · FC ${f1.format(N(r['FC Dia']))} HL/día${N(r.TMS)>0?' · TMS '+f0.format(N(r.TMS))+' HL':''}</span></td><td class="n">${f0.format(N(r['Inv. Piso']))} HL</td><td class="n"><span class="pl ${c}">${f1.format(r.tot1)} días</span></td></tr>`}).join('');
+  const lstQ=quieto.map(r=>`<tr data-sku="${esc(r.Material)}"><td><span class="nm">${esc(r.Descripcion)}</span><span class="sb">${esc(r.Material)} · ${r.rot==='Sin movimiento'?'sin entregas en el mes':f0.format(r.hlDia*10)/10+' HL/día'}</span></td><td class="n">${f0.format(r.inv)} HL</td><td class="n"><span class="pl ${r.rot==='Sin movimiento'?'r':'a'}">${r.rot==='Sin movimiento'?'Sin mov.':fmt.dias(r.dInv)+' días'}</span></td></tr>`).join('');
+  const lstT=tms.map(r=>`<tr data-sku="${esc(r.Material)}"><td><span class="nm">${esc(r.Descripcion)}</span><span class="sb">${esc(r.Material)}</span></td><td class="n">${f0.format(N(r.TMS))} HL</td><td class="n"><span class="pl g">${r['Fecha Arribo TMS']?esc(String(r['Fecha Arribo TMS']).slice(5).split('-').reverse().join('/')):'—'}</span></td></tr>`).join('');
+  const card=(id,l,v,sub)=>`<div class="hk" id="${id}"><div class="l">${l}</div><div class="row"><div class="v">${v}</div><svg class="spk"></svg></div><div class="row"><span class="s">${sub}</span><span class="dl nt">…</span></div></div>`;
+  $('charts').innerHTML=`<div class="home" style="grid-column:1/-1">
+   <div class="hl"><div><div class="hlt">Hoy · ${esc(fechaTxt)}</div><div class="hls">${fr.join(' · ')}.</div></div>
+     <div class="hlb"><span class="chipA" data-go="tso"><i style="background:#ff5a68"></i>TSO del día</span><span class="chipA" data-go="d1"><i style="background:#fab219"></i>Cobertura D+1</span><span class="chipA" data-go="rot"><i style="background:#5fd08f"></i>Rotación</span></div></div>
+   <div class="hks">
+     ${card('k_ocu','Ocupación bodega',now.ocu==null?'—':f0.format(now.ocu*100)+' %',cap?f0.format(cap)+' HL de capacidad':'falta capacidad')}
+     ${card('k_piso','Inventario en piso',f0.format(now.piso),'HL en bodega')}
+     ${card('k_dc','Cobertura promedio',f1.format(now.dc),'días de inventario vs FC')}
+     ${card('k_tso','TSO del día',f1.format(now.tso*100)+' %',f0.format(now.tsoHl)+' HL por fuera')}
+     ${card('k_cump','Entregado vs FC',f0.format(now.cump*100)+' %','acumulado del mes')}
+   </div>
+   <div class="hg"><div class="hc gauge"><h4 style="align-self:flex-start">Ocupación de la bodega</h4><div class="cs" style="align-self:flex-start">Piso + calidad + bloqueo, y con los tránsitos que vienen.</div>${gaugeSvg(now.ocu,now.ocuT)}
+       <div class="lg2"><span><i style="background:#2a78d6"></i>Piso ${now.ocu==null?'—':f0.format(now.ocu*100)+' %'}</span><span><i style="background:#b5d4f4"></i>Con tránsitos ${now.ocuT==null?'—':f0.format(now.ocuT*100)+' %'}</span></div></div>
+     <div class="hc"><h4>SKUs en riesgo de quiebre</h4><div class="cs">Menor cobertura D+1 (bodega + tránsitos − preventa de mañana), con FC de 5 HL/día o más.</div><table class="lst">${lstR||'<tr><td>Sin SKUs en riesgo.</td></tr>'}</table></div></div>
+   <div class="hg3"><div class="hc"><h4>Inventario quieto</h4><div class="cs">Más HL en bodega con baja rotación o sin entregas en el mes.</div><table class="lst">${lstQ||'<tr><td>Todo el inventario está rotando.</td></tr>'}</table></div>
+     <div class="hc"><h4>Próximas llegadas (TMS)</h4><div class="cs">Producto en camino al CD, por fecha de arribo.</div><table class="lst">${lstT||'<tr><td>No hay envíos de TMS en la última carga.</td></tr>'}</table></div></div>
+  </div>`;
+  $('charts').querySelectorAll('[data-go]').forEach(c=>c.onclick=()=>{VIEW=c.dataset.go;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.v===VIEW));try{history.replaceState(null,'','#'+VIEW)}catch(e){};render()});
+  copyData={h:['SKU','Descripción','Inv. piso HL','Cobertura D+1'],r:riesgo.map(r=>[r.Material,r.Descripcion,Math.round(N(r['Inv. Piso'])),Math.round(r.tot1*10)/10])};
+  $('foot').textContent='Las flechas comparan contra la publicación del día anterior; las líneas muestran los últimos 14 días con datos. Clic en cualquier SKU para ver su ficha.';
+  // histórico (asíncrono)
+  const H=await cargarHist();if(VIEW!=='inicio')return;
+  const fs=Object.keys(H).sort(),prevF=fs.filter(f=>f<hoy).pop(),P=prevF?H[prevF]:null;
+  const ser=k=>fs.map(f=>H[f][k]);
+  const set=(id,k,fmtD,bueno,color,eps)=>{const el=$(id);if(!el)return;const cur=H[hoy]&&H[hoy][k]!=null?H[hoy][k]:now[k];el.querySelector('.spk').outerHTML=spark(ser(k),color);el.querySelector('.dl').outerHTML=deltaHtml(cur,P?P[k]:null,fmtD,bueno,eps);
+    if(k==='tso'&&H[hoy]&&H[hoy].tso!=null){el.querySelector('.v').textContent=f1.format(H[hoy].tso*100)+' %';if(H[hoy].tsoHl!=null)el.querySelector('.s').textContent=f0.format(H[hoy].tsoHl)+' HL por fuera (foto de la mañana)'}};
+  const pp=x=>f1.format(x*100)+' pts';
+  set('k_ocu','ocu',pp,'down','#2a78d6',0.0005);set('k_piso','piso',x=>f0.format(x)+' HL','up','#2a78d6',0.5);set('k_dc','dc',x=>f1.format(x)+' días','up','#2a78d6',0.05);
+  set('k_tso','tso',pp,'down','#d50f25',0.0005);set('k_cump','cump',pp,'up','#1baf7a',0.0005);
+}
 function layout(){
   const sku=VIEW==='sku';
-  document.querySelector('.bar').style.display=sku?'none':'';
-  document.querySelector('.wrap').style.display=(sku||VIEW==='ocu'||VIEW==='tso')?'none':'';
+  document.querySelector('.bar').style.display=(sku||VIEW==='inicio')?'none':'';
+  document.querySelector('.wrap').style.display=(sku||VIEW==='ocu'||VIEW==='tso'||VIEW==='inicio')?'none':'';
   $('bCols').style.display=VIEW==='data'?'':'none';
   $('ficha').style.display=sku?'block':'none';
-  if(VIEW!=='rot'&&VIEW!=='ocu'&&VIEW!=='tso')$('charts').innerHTML='';
+  if(VIEW!=='rot'&&VIEW!=='ocu'&&VIEW!=='tso'&&VIEW!=='inicio')$('charts').innerHTML='';
 }
-const VIEWINFO={"ocu": ["Ocupación de bodega", "Cuánto espacio ocupa el producto terminado frente a la capacidad del CD."], "d1": ["Cobertura D+1", "Días de inventario en bodega y tránsitos, descontando la preventa de mañana."], "d3": ["Cobertura D+3", "Cobertura en bloques de tres días frente a la preventa de la semana."], "canal": ["Volumen entregado por canal", "Entregas del mes por KA, TAT y Socios frente al forecast acumulado."], "tso": ["TSO · Stock out teórico", "Hectolitros que faltan en piso para cubrir el forecast del día."], "rot": ["Rotación por SKU", "Qué producto se mueve, cuánto y qué se está quedando quieto en bodega."], "sku": ["Detalle por SKU", "La ficha completa de un producto: inventario, balance, canales y clientes."], "data": ["Tabla completa", "Todas las columnas de la pestaña Data, con filtros y orden."]};
-function render(){ if(!D)return; try{const vi=VIEWINFO[VIEW]||['',''];$('vt').textContent=vi[0];$('vd').textContent=vi[1];const m=$('mainEl');m.classList.remove('anim');void m.offsetWidth;m.classList.add('anim')}catch(e){} layout(); VIEW==='data'?renderData():VIEW==='sku'?renderSku():VIEW==='ocu'?renderOcu():VIEW==='tso'?renderTSO():renderView(); }
+const VIEWINFO={"inicio":["Resumen del día","Lo más importante del CD en un vistazo: ocupación, riesgos, inventario quieto y llegadas."],"ocu": ["Ocupación de bodega", "Cuánto espacio ocupa el producto terminado frente a la capacidad del CD."], "d1": ["Cobertura D+1", "Días de inventario en bodega y tránsitos, descontando la preventa de mañana."], "d3": ["Cobertura D+3", "Cobertura en bloques de tres días frente a la preventa de la semana."], "canal": ["Volumen entregado por canal", "Entregas del mes por KA, TAT y Socios frente al forecast acumulado."], "tso": ["TSO · Stock out teórico", "Hectolitros que faltan en piso para cubrir el forecast del día."], "rot": ["Rotación por SKU", "Qué producto se mueve, cuánto y qué se está quedando quieto en bodega."], "sku": ["Detalle por SKU", "La ficha completa de un producto: inventario, balance, canales y clientes."], "data": ["Tabla completa", "Todas las columnas de la pestaña Data, con filtros y orden."]};
+function render(){ if(!D)return; try{const vi=VIEWINFO[VIEW]||['',''];$('vt').textContent=vi[0];$('vd').textContent=vi[1];const m=$('mainEl');m.classList.remove('anim');void m.offsetWidth;m.classList.add('anim')}catch(e){} layout(); VIEW==='data'?renderData():VIEW==='sku'?renderSku():VIEW==='inicio'?renderInicio():VIEW==='ocu'?renderOcu():VIEW==='tso'?renderTSO():renderView(); }
 document.querySelectorAll('#tabs button').forEach(b=>{b.classList.toggle('on',b.dataset.v===VIEW);b.onclick=()=>{VIEW=b.dataset.v;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));try{history.replaceState(null,'','#'+VIEW)}catch(e){};render()}});
 ['q','fMarca','fLines','fTipo','fEstado','fMov'].forEach(id=>$(id).addEventListener('input',render));
 $('bCols').onclick=()=>{const c=$('cols');c.style.display=c.style.display==='block'?'none':'block'};
@@ -870,6 +1018,9 @@ $('bPub').onclick=async()=>{
        const fecha=String(P.generado).slice(0,10),hora=String(P.generado).slice(11,16),tref=doc(FB,col,'tso_'+fecha);
        // TSO: vale la primera publicación del día (la de la mañana). Las siguientes no la cambian, salvo que se marque reemplazar.
        let ya=null;try{const e=await getDoc(tref);if(e.exists())ya=e.data()}catch(e){}
+       {const cols=P.columns,rs=P.rows.map(a=>{const o={};cols.forEach((c,i)=>o[c]=a[i]);return o}),s=k=>rs.reduce((a,r)=>a+(+r[k]||0),0),cap=P.capacidad||0;
+        const piso=s('Inv. Piso'),cal=s('Inv. Calidad'),blq=s('Inv. Bloqueo'),tra=s('Inv. Transito'),fcd=s('FC Dia'),ent=s('Volumen Entregado'),fcm=s('FC MES');
+        batch.set(doc(FB,col,'hist_'+fecha),{fecha,hora,ocu:cap?(piso+cal+blq)/cap:null,ocuT:cap?(piso+cal+blq+tra)/cap:null,piso,tra,dc:fcd?piso/fcd:0,cump:fcm?ent/fcm:0,ent});}
        if(!ya||$('tsoRep').checked){batch.set(tref,{fecha,hora,data:JSON.stringify(foto)});tsoMsg.push(`${nomC(c)}: foto TSO del ${fecha} guardada (${hora})`)}
        else tsoMsg.push(`${nomC(c)}: la foto TSO de hoy ya estaba (${ya.hora||'primera publicación'}), no se cambió`);}
       if(files.fc&&files.fc.data.fc[c])batch.set(doc(FB,col,'fc'),{mes:files.fc.data.mes||null,cargado:P.generado,data:JSON.stringify(files.fc.data.fc[c])});
