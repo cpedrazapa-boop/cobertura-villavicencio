@@ -334,6 +334,6 @@
     return { name: n, rows: XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: true, defval: null }) };
   }
 
-  const api = { COLUMNS, parseZexi, parseTms, parsePreventa, parseSL, parseFC, parseClientes, abcDe, classify, compute, pickSheet, weeknum, norm, num, key };
+  const api = { VERSION: '20261119b', COLUMNS, parseZexi, parseTms, parsePreventa, parseSL, parseFC, parseClientes, abcDe, classify, compute, pickSheet, weeknum, norm, num, key };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.Engine = api;
 })(typeof self !== 'undefined' ? self : this);

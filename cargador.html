@@ -281,8 +281,8 @@ table thead th{background:var(--card)}
 <div id="toast"></div>
 <div id="tip"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="centros.js?v=20261119a"></script>
-<script src="engine.js?v=20261119a"></script>
+<script src="centros.js?v=20261119b"></script>
+<script src="engine.js?v=20261119b"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -642,7 +642,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('#prevSeg button'
 function clientesHtml(sku){
   if(!CLIENTES)return '<div class="empty">No hay datos de clientes en la última publicación. Se llenan al publicar con la preventa en crudo (archivo de surtido).</div>';
   let L=CLIENTES[String(sku)];if(!L||!L.length)return '<div class="empty">Este SKU no tiene pedidos en la preventa cargada.</div>';
-  if(PREV_MODO==='d1'){if(L[0].length<6)return '<div class="empty">La última publicación no separa D+1 por cliente. Vuelve a publicar desde el cargador y aparecerá.</div>';
+  if(PREV_MODO==='d1'){if(L[0].length<6||L[0][5]==null)return '<div class="empty">La última publicación no separa D+1 por cliente. Vuelve a publicar desde el cargador y aparecerá.</div>';
     L=L.filter(x=>x[5]>0).map(x=>[x[0],x[5],x[2],x[3],x[4],x[5]]).sort((a,b)=>b[1]-a[1]);
     if(!L.length)return '<div class="empty">Este SKU no tiene pedidos para mañana (D+1). Cambia a D+3 para ver toda la preventa.</div>';}
   if(!NOMBRES&&L.some(x=>!x[4]))cargarNombres();
@@ -781,6 +781,7 @@ function renderFiles(){
 }
 async function addFiles(list){
   if(typeof XLSX==='undefined'||typeof Engine==='undefined'){msg('No cargó el lector de Excel; recarga la página',true);return}
+  if(Engine.VERSION!=='20261119b'){msg('Tu navegador está usando una versión vieja del motor de cálculo. Recarga la página con Ctrl+F5 y vuelve a subir los archivos.',true);return}
   extras.length=0;
   for(const f of list){
     msg('Leyendo '+f.name+'…');
