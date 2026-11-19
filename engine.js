@@ -105,10 +105,10 @@
         rs.forEach(x => {
           add(d3, x); if (x.dia === d1day) add(d1, x);
           const c = (cl[x.sku] || (cl[x.sku] = {})), k = x.cli;
-          const o = c[k] || (c[k] = { hl: 0, docs: new Set(), tp: x.tp }); o.hl += x.hl; if (x.doc != null) o.docs.add(x.doc);
+          const o = c[k] || (c[k] = { hl: 0, hl1: 0, docs: new Set(), tp: x.tp }); o.hl += x.hl; if (x.dia === d1day) o.hl1 += x.hl; if (x.doc != null) o.docs.add(x.doc);
         });
         const clientes = {};
-        for (const sku in cl) clientes[sku] = Object.entries(cl[sku]).map(([c, o]) => [c, Math.round(o.hl * 100) / 100, o.docs.size, o.tp]).sort((a, b) => b[1] - a[1]);
+        for (const sku in cl) clientes[sku] = Object.entries(cl[sku]).map(([c, o]) => [c, Math.round(o.hl * 100) / 100, o.docs.size, o.tp, '', Math.round(o.hl1 * 100) / 100]).sort((a, b) => b[1] - a[1]);
         out[cd] = { d1, d3, clientes, d1day, dias: [...new Set(rs.map(x => x.dia))].sort((a, b) => dist(a) - dist(b)) };
       }
       return out;
@@ -325,7 +325,7 @@
       return COLUMNS.map(c => { const x = v[c]; return typeof x === 'number' ? Math.round(x * 100) / 100 : (x == null ? null : x); });
     });
     const matched = master.filter(m => zByKey[key(m.Material) + CENTRO + CENTRO.replace(/\D/g, '') + '01']).length;
-    return { columns: COLUMNS, rows, dia: day, semana, centro: CENTRO, clientes: prev.clientes || null, d1day: prev.d1day || null, stats: { zexi: zexiRows.length, tms: tmsRows.length, prevD1: Object.keys(prev.d1).length, prevD3: Object.keys(prev.d3).length, skusConZexi: matched } };
+    return { columns: COLUMNS, rows, dia: day, semana, centro: CENTRO, clientes: prev.clientes || null, d1day: prev.d1day || null, dias: prev.dias || null, stats: { zexi: zexiRows.length, tms: tmsRows.length, prevD1: Object.keys(prev.d1).length, prevD3: Object.keys(prev.d3).length, skusConZexi: matched } };
   }
 
   /* Elige la hoja correcta dentro de un libro (por nombre, o la primera) */
