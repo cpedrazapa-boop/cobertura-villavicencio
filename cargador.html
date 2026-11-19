@@ -600,7 +600,7 @@ function renderSku(){
   let acc=0,clase='—',rank=0;for(let i=0;i<all.length;i++){if(String(all[i].m)===SKU){rank=i+1;clase=r.ent<=0?'—':acc/tot<0.8?'A':acc/tot<0.95?'B':'C';break}acc+=all[i].e}
   const sem=(fn,v)=>({'c-r':'r','c-y':'a','c-g':'g'}[fn(v)]||'');
   $('kpis').innerHTML=[
-    ['Inventario en piso',f0.format(N(r['Inv. Piso']))+' HL','',`${f0.format(N(r.Existencia))} ${esc(r.UM)} en bodega`],
+    ['Inventario en piso',f0.format(N(r['Inv. Piso']))+' HL','',`${N(r.presentacio)?f0.format(N(r.Existencia)/N(r.presentacio))+' '+esc(r.UM):f0.format(N(r.Existencia))+' unidades'} en bodega`],
     ['Tránsitos',f0.format(N(r['Inv. Transito']))+' HL','',`TMS: ${f0.format(N(r.TMS))} HL${r['Fecha Arribo TMS']?' · llega '+esc(r['Fecha Arribo TMS']):''}`],
     ['FC día',f1.format(N(r['FC Dia']))+' HL','',`FC mes ${f0.format(N(r['FC TOTAL CD']))} HL`],
     ['Cobertura D+1',f1.format(r.tot1)+' días',sem(semDC,r.tot1),'bodega + tránsitos − preventa'],
@@ -706,9 +706,12 @@ function clientesHtml(sku){
   if(!NOMBRES&&L.some(x=>!x[4]))cargarNombres();
   const nom=x=>x[4]||(NOMBRES&&NOMBRES[String(x[0])])||'';
   const tot=L.reduce((a,x)=>a+x[1],0),top=L.slice(0,15),mx=top[0][1]||1,t5=L.slice(0,5).reduce((a,x)=>a+x[1],0);
-  return `<div class="legend"><span>${L.length} clientes · ${f1.format(tot)} HL en preventa ${PREV_MODO==='d1'?'D+1':'D+3'} · los 5 primeros llevan el ${f0.format(dv(t5,tot)*100)} %</span><span><i style="background:var(--tat)"></i>TAT (ZCP1)</span><span><i style="background:var(--ka)"></i>KA (ZCP6)</span></div>
-   <div class="hb">${top.map(x=>{const [c,hl,docs,tp]=x,nm=nom(x);return `<div class="lab" style="cursor:default" title="Cliente ${esc(c)}">${nm?esc(nm)+' <span style="color:var(--mute)">· '+esc(c)+'</span>':'Cliente '+esc(c)}</div><div class="trk" style="width:${hl/mx*100}%"><span style="flex:1;background:${tp==='ZCP6'?'var(--ka)':'var(--tat)'}" data-tip="<b>${esc(nm||'Cliente '+c)}</b><br>Código ${esc(c)}<br>${f1.format(hl)} HL · ${docs} pedido${docs===1?'':'s'} · ${tp==='ZCP6'?'KA':'TAT'}"></span></div><div class="val">${f1.format(hl)} HL · ${f0.format(dv(hl,tot)*100)} %</div>`}).join('')}</div>
-   ${L.length>15?`<div class="cs" style="margin-top:8px">Y ${L.length-15} clientes más con ${f1.format(tot-top.reduce((a,x)=>a+x[1],0))} HL.</div>`:''}`;
+  // HL -> unidades de venta (cajas, SXP...): HL = unidades de venta × presentación × contenido (cc) ÷ 100.000
+  const R0=rows.find(r=>String(r.Material)===String(sku)),Q=R0?N(R0.conte)*N(R0.presentacio):0,UM=R0&&R0.UM?String(R0.UM):'und';
+  const und=hl=>{if(!Q)return null;const u=hl*1e5/Q;return u<1?Math.round(u*10)/10:Math.round(u)},uTxt=hl=>{const u=und(hl);return u==null?'':`${u<1?f1.format(u):f0.format(u)} ${esc(UM)}`};
+  return `<div class="legend"><span>${L.length} clientes · ${Q?uTxt(tot)+' · ':''}${f1.format(tot)} HL en preventa ${PREV_MODO==='d1'?'D+1':'D+3'} · los 5 primeros llevan el ${f0.format(dv(t5,tot)*100)} %</span><span><i style="background:var(--tat)"></i>TAT (ZCP1)</span><span><i style="background:var(--ka)"></i>KA (ZCP6)</span></div>
+   <div class="hb">${top.map(x=>{const [c,hl,docs,tp]=x,nm=nom(x);return `<div class="lab" style="cursor:default" title="Cliente ${esc(c)}">${nm?esc(nm)+' <span style="color:var(--mute)">· '+esc(c)+'</span>':'Cliente '+esc(c)}</div><div class="trk" style="width:${hl/mx*100}%"><span style="flex:1;background:${tp==='ZCP6'?'var(--ka)':'var(--tat)'}" data-tip="<b>${esc(nm||'Cliente '+c)}</b><br>Código ${esc(c)}<br>${Q?uTxt(hl)+' · ':''}${f1.format(hl)} HL · ${docs} pedido${docs===1?'':'s'} · ${tp==='ZCP6'?'KA':'TAT'}"></span></div><div class="val">${Q?'<b style="color:var(--ink)">'+uTxt(hl)+'</b> · ':''}${f1.format(hl)} HL · ${f0.format(dv(hl,tot)*100)} %</div>`}).join('')}</div>
+   ${L.length>15?`<div class="cs" style="margin-top:8px">Y ${L.length-15} clientes más con ${Q?uTxt(tot-top.reduce((a,x)=>a+x[1],0))+' · ':''}${f1.format(tot-top.reduce((a,x)=>a+x[1],0))} HL.</div>`:''}`;
 }
 
 /* ---------- TSO: stock out teórico (FCST día vs HL en piso) ---------- */
