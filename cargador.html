@@ -923,6 +923,8 @@ function parseTipo(k,rows){
 function renderFiles(){
   const order=['zexi','tms','prev','sl1','sl2','fc','cli'];
   $('flist').innerHTML=order.map(k=>{const f=files[k];const need=k==='zexi'||k==='prev';
+    if(!f&&(k==='sl1'||k==='sl2')){const g=Object.entries(SL_GUARDADO[k]).filter(([c])=>CENTROS[c]);
+      return `<div class="fitem ${g.length?'ok':''}"><span>${g.length?'✓':'–'}</span><b>${TIPOS[k]}</b><span>${g.length?'Usando el guardado: '+g.map(([c,x])=>`${nomC(c)} (cargado ${esc(x.cargado||'')})`).join(' · ')+'. Súbelo de nuevo cuando quieras actualizarlo.':'No cargado (opcional)'}</span></div>`}
     if(!f&&k==='fc'){const g=Object.entries(FC_GUARDADO).filter(([c])=>CENTROS[c]);
       return `<div class="fitem ${g.length?'ok':''}"><span>${g.length?'✓':'–'}</span><b>${TIPOS[k]} (mensual)</b><span>${g.length?'Usando el guardado: '+g.map(([c,x])=>`${nomC(c)} mes ${x.mes||'?'} (cargado ${esc(x.cargado||'')})`).join(' · ')+'. Súbelo solo cuando cambie el mes.':'No hay pronóstico guardado: Villavicencio usa el FC del Excel y Yopal queda sin FC. Súbelo una vez al mes.'}</span></div>`}
     if(!f&&k==='cli')return `<div class="fitem ${CLI_GUARDADO?'ok':''}"><span>${CLI_GUARDADO?'✓':'–'}</span><b>${TIPOS[k]} (ocasional)</b><span>${CLI_GUARDADO?`Usando el guardado: ${f0.format(Object.keys(CLI_GUARDADO.map).length)} clientes (cargado ${esc(CLI_GUARDADO.cargado||'')}).`:'No hay maestro guardado: los clientes se verán solo con su código.'}</span></div>`;
@@ -954,11 +956,12 @@ $('fAll').onchange=e=>{addFiles([...e.target.files]);e.target.value=''};
 const dz=$('dAll');['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('over')}));
 ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('over')}));
 dz.addEventListener('drop',e=>addFiles([...e.dataTransfer.files]));
-let pending=null,FC_GUARDADO={},CLI_GUARDADO=null;
+let pending=null,FC_GUARDADO={},SL_GUARDADO={sl1:{},sl2:{}},CLI_GUARDADO=null;
 const CLI_COL=()=>CENTROS[CODS[0]].col;
 async function cargarFCGuardado(){
   if(!FB)return;
   try{const m=await getDoc(doc(FB,CLI_COL(),'cmeta'));if(m.exists()){const b=m.data(),parts=await Promise.all(Array.from({length:b.chunks},(_,i)=>getDoc(doc(FB,CLI_COL(),'cm'+i))));const map={};parts.forEach(p=>{if(p.exists())Object.assign(map,JSON.parse(p.data().data))});CLI_GUARDADO={cargado:b.cargado,map}}}catch(e){}
+  for(const c of CODS)for(const t of ['sl1','sl2']){try{const d=await getDoc(doc(FB,CENTROS[c].col,t));if(d.exists()){const b=d.data();SL_GUARDADO[t][c]={cargado:b.cargado,data:JSON.parse(b.data)}}}catch(e){}}
   for(const c of CODS){try{const d=await getDoc(doc(FB,CENTROS[c].col,'fc'));if(d.exists()){const b=d.data();FC_GUARDADO[c]={mes:b.mes,cargado:b.cargado,fc:JSON.parse(b.data)}}}catch(e){}}
   renderFiles();
 }
@@ -976,8 +979,8 @@ async function preview(){
   const cs=CODS.filter(c=>files.zexi.data.some(z=>z.ce===c)).filter(c=>!solo||c===CENTRO);
   const out={};
   for(const c of cs){
-    const sl=files.sl1&&files.sl1.data.sol?files.sl1.data.sol[c]||null:null;
-    const canal=files.sl2&&files.sl2.data.canal?files.sl2.data.canal[c]||null:null;
+    const sl=files.sl1&&files.sl1.data.sol?files.sl1.data.sol[c]||null:(SL_GUARDADO.sl1[c]?SL_GUARDADO.sl1[c].data:null);
+    const canal=files.sl2&&files.sl2.data.canal?files.sl2.data.canal[c]||null:(SL_GUARDADO.sl2[c]?SL_GUARDADO.sl2[c].data:null);
     const fc=files.fc?(files.fc.data.fc[c]||null):(FC_GUARDADO[c]?FC_GUARDADO[c].fc:null);
     const r=Engine.compute(MASTER,files.zexi.data,files.tms?files.tms.data:[],prev,today,c,{sl,canal,fc});
     r.generado=gen;const inp=document.querySelector(`#cenTbl input[data-cap="${c}"]`);r.capacidad=N(inp&&inp.value)||CENTROS[c].cap||null;
@@ -1026,6 +1029,8 @@ $('bPub').onclick=async()=>{
         batch.set(doc(FB,col,'hist_'+fecha),{fecha,hora,ocu:cap?(piso+cal+blq)/cap:null,ocuT:cap?(piso+cal+blq+tra)/cap:null,piso,tra,dc:fcd?piso/fcd:0,cump:fcm?ent/fcm:0,ent});}
        if(!ya||$('tsoRep').checked){batch.set(tref,{fecha,hora,data:JSON.stringify(foto)});tsoMsg.push(`${nomC(c)}: foto TSO del ${fecha} guardada (${hora})`)}
        else tsoMsg.push(`${nomC(c)}: la foto TSO de hoy ya estaba (${ya.hora||'primera publicación'}), no se cambió`);}
+      if(files.sl1&&files.sl1.data.sol&&files.sl1.data.sol[c])batch.set(doc(FB,col,'sl1'),{cargado:P.generado,data:JSON.stringify(files.sl1.data.sol[c])});
+      if(files.sl2&&files.sl2.data.canal&&files.sl2.data.canal[c])batch.set(doc(FB,col,'sl2'),{cargado:P.generado,data:JSON.stringify(files.sl2.data.canal[c])});
       if(files.fc&&files.fc.data.fc[c])batch.set(doc(FB,col,'fc'),{mes:files.fc.data.mes||null,cargado:P.generado,data:JSON.stringify(files.fc.data.fc[c])});
       batch.set(doc(FB,col,'meta'),{version,chunks:n,kchunks:kc.length,d1day:P.d1day||null,dias:P.dias||null,dia:P.dia||null,capacidad:P.capacidad||null,columns:P.columns,semana:P.semana,centro:c,generado:P.generado,por:USER.displayName||USER.email,stats:P.stats});
       await batch.commit();ok.push(nomC(c));
@@ -1033,6 +1038,7 @@ $('bPub').onclick=async()=>{
   }
   if(files.cli&&ok.length&&!files.cli.guardado){try{await guardarClientes()}catch(e){bad.push('maestro de clientes ('+(e.code||e.message)+')')}}
   curVersion=null;for(const k in TSO_CACHE)delete TSO_CACHE[k];
+  for(const c of Object.keys(pending)){if(files.sl1&&files.sl1.data.sol&&files.sl1.data.sol[c])SL_GUARDADO.sl1[c]={cargado:pending[c].generado,data:files.sl1.data.sol[c]};if(files.sl2&&files.sl2.data.canal&&files.sl2.data.canal[c])SL_GUARDADO.sl2[c]={cargado:pending[c].generado,data:files.sl2.data.canal[c]}}
   if(files.fc)for(const c of Object.keys(pending))if(files.fc.data.fc[c])FC_GUARDADO[c]={mes:files.fc.data.mes,cargado:pending[c].generado,fc:files.fc.data.fc[c]};
   if(bad.length){msg((ok.length?'Publicado: '+ok.join(' y ')+'. ':'')+'No se pudo publicar: '+bad.join('; '),true);$('bPub').disabled=false}
   else{msg('Publicado: '+ok.join(' y ')+'. Todos ven ahora esta versión. '+tsoMsg.join(' · ')+'.');toast('Publicado para todos');$('stale').innerHTML=''}
