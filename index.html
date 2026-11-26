@@ -864,6 +864,8 @@ async function renderInicio(){
 }
 
 /* ---------- Tránsitos T1 (tractomulas en camino) ---------- */
+const PLANTAS={CV01:'Valle',TO28:'Tocancipá',BY28:'Boyacá'};
+const planta=c=>PLANTAS[c]?PLANTAS[c]:(c||'—');
 let T1=null; // {cargado, data:[[mat,fecha,unidades,hl,origen,placa,entrega]]}
 async function cargarT1(){T1=null;if(!FB)return;try{const d=await getDoc(doc(FB,COL,'t1'));if(d.exists()){const b=d.data();T1={cargado:b.cargado,data:JSON.parse(b.data)}}}catch(e){}}
 function renderT1(){
@@ -885,14 +887,16 @@ function renderT1(){
     ['Días de cobertura que traen',f1.format(dv(tot,rows.filter(r=>S.has(String(r.Material))).reduce((a,r)=>a+N(r['FC Dia']),0))),'','HL en camino ÷ FC día del CD'],
     ['Tránsito en ZEXI (alm. '+PRE+'40)',f0.format(zx)+' HL',Math.abs(zx-tot)>Math.max(50,tot*0.1)?'a':'',Math.abs(zx-tot)<1?'cuadra con el listado':`diferencia de ${f0.format(Math.abs(zx-tot))} HL con el listado`]
   ].map(([l,v,c,s])=>`<div class="kpi ${c}"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join('');
-  $('charts').innerHTML=`<div class="card viz"><h4>HL despachados por fecha de salida</h4><div class="cs">Fecha de salida de mercancía en la planta (S.M.).</div>
+  $('charts').innerHTML=`<div class="card viz"><h4>HL por planta de origen</h4><div class="cs">De dónde viene el producto en camino.</div>
+     <div class="hb" style="margin-bottom:16px">${(()=>{const po={};L.forEach(x=>{const k=planta(x.o);const o=po[k]||(po[k]={hl:0,c:new Set()});o.hl+=x.hl;o.c.add(x.pl)});const a=Object.entries(po).sort((x,y)=>y[1].hl-x[1].hl),m=Math.max(1,...a.map(x=>x[1].hl));return a.map(([k,o])=>`<div class="lab" style="cursor:default">${esc(k)}</div><div class="trk" style="width:${o.hl/m*100}%"><span style="flex:1;background:var(--soc)" data-tip="${esc(k)}<br>${f0.format(o.hl)} HL en ${o.c.size} camiones"></span></div><div class="val">${f0.format(o.hl)} HL · ${f0.format(dv(o.hl,tot)*100)} % · ${o.c.size} camiones</div>`).join('')})()}</div>
+     <h4>HL despachados por fecha de salida</h4><div class="cs">Fecha de salida de mercancía en la planta (S.M.).</div>
      <div class="hb">${porF.map(x=>`<div class="lab" style="cursor:default">${fF(x.f)}</div><div class="trk" style="width:${x.hl/mxF*100}%"><span style="flex:1;background:var(--ka)" data-tip="Salida ${fF(x.f)}<br>${f0.format(x.hl)} HL en ${x.n} camiones"></span></div><div class="val">${f0.format(x.hl)} HL · ${x.n} camiones</div>`).join('')}</div></div>
    <div class="card viz"><h4>SKUs que vienen en camino</h4><div class="cs">HL y unidades de venta por SKU, y cuántos días de su FC cubren.</div><div class="tscroll"><table class="tt"><thead><tr><th class="t">SKU</th><th class="t">Descripción</th><th>Unid. venta</th><th>HL</th><th>Días FC</th><th>Camiones</th></tr></thead><tbody>
      ${skus.map(x=>`<tr data-sku="${esc(x.m)}"><td class="t">${esc(x.m)}</td><td class="t" title="${esc(x.d)}">${esc(x.d)}</td><td>${x.cj?f0.format(x.cj)+' '+esc(x.um):'—'}</td><td>${f0.format(x.hl)}</td><td>${x.fc?f1.format(x.hl/x.fc):'—'}</td><td>${x.pl.size}</td></tr>`).join('')}</tbody></table></div></div>
    <div class="card full"><div class="ch">TRACTOMULAS EN TRÁNSITO</div><div class="tscroll" style="max-height:520px"><table class="tt"><thead><tr><th class="t">Placa</th><th class="t">Salida</th><th class="t">Origen</th><th>HL</th><th>SKUs</th><th class="t">Contenido</th></tr></thead><tbody>
-     ${cams.map(c=>`<tr><td class="t"><b>${esc(c.pl)}</b></td><td class="t">${fF(c.f)}</td><td class="t">${esc(c.o)}</td><td>${f0.format(c.hl)}</td><td>${c.sk.size}</td><td class="t" style="white-space:normal;max-width:none">${c.it.map(x=>`<span class="chip" data-sku="${esc(x.m)}" style="cursor:pointer">${esc(x.d)} · ${x.cj?f0.format(x.cj)+' '+esc(x.um):f0.format(x.u)+' und'}</span>`).join(' ')}</td></tr>`).join('')}
+     ${cams.map(c=>`<tr><td class="t"><b>${esc(c.pl)}</b></td><td class="t">${fF(c.f)}</td><td class="t" title="${esc(c.o)}">${esc(planta(c.o))}</td><td>${f0.format(c.hl)}</td><td>${c.sk.size}</td><td class="t" style="white-space:normal;max-width:none">${c.it.map(x=>`<span class="chip" data-sku="${esc(x.m)}" style="cursor:pointer">${esc(x.d)} · ${x.cj?f0.format(x.cj)+' '+esc(x.um):f0.format(x.u)+' und'}</span>`).join(' ')}</td></tr>`).join('')}
      <tr class="tot"><td class="t">Total</td><td></td><td></td><td>${f0.format(tot)}</td><td>${skus.length}</td><td></td></tr></tbody></table></div></div>`;
-  copyData={h:['Placa','Salida','Origen','SKU','Descripción','Unidades','HL'],r:L.map(x=>[x.pl,x.f,x.o,x.m,x.d,x.u,Math.round(x.hl*10)/10])};
+  copyData={h:['Placa','Salida','Origen','SKU','Descripción','Unidades','HL'],r:L.map(x=>[x.pl,x.f,planta(x.o),x.m,x.d,x.u,Math.round(x.hl*10)/10])};
   $('foot').textContent=`Listado de tránsitos intercompañías de SAP cargado ${T1.cargado||''}. HL = unidades × contenido (cc) ÷ 100.000. Clic en un SKU para ver su ficha.`;
 }
 function layout(){
