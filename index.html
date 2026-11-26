@@ -914,7 +914,7 @@ function parseTipo(k,rows){
   if(k==='tms'){const d=Engine.parseTms(rows,CODS),by={};d.forEach(t=>{const c=CODS.find(c=>t.llave.endsWith(c));by[c]=(by[c]||0)+t.hl});return {data:d,info:d.length?CODS.filter(c=>by[c]).map(c=>`${nomC(c)}: ${f0.format(by[c])} HL`).join(' · ')+` (${d.length} envíos de PT)`:'sin envíos de PT para estos centros: TMS queda en 0'}}
   if(k==='prev'){const d=Engine.parsePreventa(rows,new Date());if(d['*'])return {data:d,info:'formato del Excel (un solo centro: '+nomC(CENTRO)+')'};
     return {data:d,info:Object.entries(d).filter(([c])=>CENTROS[c]).map(([c,p])=>`${nomC(c)}: D+1 = día ${p.d1day}, D+3 = días ${p.dias[0]} a ${p.dias[p.dias.length-1]}, ${Object.keys(p.clientes).length} SKUs`).join(' · ')}}
-  if(k==='fc'){const d=Engine.parseFC(rows);return {data:d,info:`mes ${d.mes||'?'}, semanas ${d.semanas.join(', ')} · `+Object.keys(d.fc).filter(c=>CENTROS[c]).map(c=>{const v=Object.values(d.fc[c]);return `${nomC(c)}: ${f0.format(v.reduce((a,x)=>a+x.fc,0))} HL, A=${v.filter(x=>x.abc==='A').length} B=${v.filter(x=>x.abc==='B').length} C=${v.filter(x=>x.abc==='C').length}`}).join(' · ')+'. Se guarda al publicar y se usa hasta que subas el del próximo mes.'}}
+  if(k==='fc'){const d=Engine.parseFC(rows);return {data:d,info:`mes ${d.mes||'?'}, semanas ${d.semanas.join(', ')} · `+Object.keys(d.fc).filter(c=>CENTROS[c]).map(c=>{const v=Object.values(d.fc[c]);return `${nomC(c)}: ${f0.format(v.reduce((a,x)=>a+x.fc,0))} HL, A=${v.filter(x=>x.abc==='A').length} B=${v.filter(x=>x.abc==='B').length} C=${v.filter(x=>x.abc==='C').length}`}).join(' · ')+'. Al guardarlo o publicar reemplaza al anterior; puedes cambiarlo las veces que quieras.'}}
   if(k==='cli'){const d=Engine.parseClientes(rows),n=Object.keys(d).length;if(!n)throw new Error('no trae clientes');return {data:d,info:`${f0.format(n)} clientes con nombre. Se guarda al publicar y se usa en adelante; súbelo de nuevo solo cuando lo actualices.`}}
   if(k==='sl1'){const d=Engine.parseSL(rows);return {data:d,info:Object.keys(d.sol).filter(c=>CENTROS[c]).map(c=>`${nomC(c)}: ${Object.keys(d.sol[c]).length} SKUs`).join(' · ')}}
   if(k==='sl2'){const d=Engine.parseSL(rows);if(d.combinado)return {data:d,warn:true,info:'trae los dos CD sumados (no tiene la columna Codigo Centro). No la uso: las entregas por canal quedan con los valores anteriores. Descárgala con Codigo Centro en las filas, o una por cada CD.'};
@@ -926,10 +926,10 @@ function renderFiles(){
     if(!f&&(k==='sl1'||k==='sl2')){const g=Object.entries(SL_GUARDADO[k]).filter(([c])=>CENTROS[c]);
       return `<div class="fitem ${g.length?'ok':''}"><span>${g.length?'✓':'–'}</span><b>${TIPOS[k]}</b><span>${g.length?'Usando el guardado: '+g.map(([c,x])=>`${nomC(c)} (cargado ${esc(x.cargado||'')})`).join(' · ')+'. Súbelo de nuevo cuando quieras actualizarlo.':'No cargado (opcional)'}</span></div>`}
     if(!f&&k==='fc'){const g=Object.entries(FC_GUARDADO).filter(([c])=>CENTROS[c]);
-      return `<div class="fitem ${g.length?'ok':''}"><span>${g.length?'✓':'–'}</span><b>${TIPOS[k]} (mensual)</b><span>${g.length?'Usando el guardado: '+g.map(([c,x])=>`${nomC(c)} mes ${x.mes||'?'} (cargado ${esc(x.cargado||'')})`).join(' · ')+'. Súbelo solo cuando cambie el mes.':'No hay pronóstico guardado: Villavicencio usa el FC del Excel y Yopal queda sin FC. Súbelo una vez al mes.'}</span></div>`}
+      return `<div class="fitem ${g.length?'ok':''}"><span>${g.length?'✓':'–'}</span><b>${TIPOS[k]} (mensual)</b><span>${g.length?'Usando el guardado: '+g.map(([c,x])=>`${nomC(c)} mes ${x.mes||'?'} (cargado ${esc(x.cargado||'')})`).join(' · ')+'. Para cambiarlo, sube el nuevo archivo: reemplaza a este.':'No hay pronóstico guardado: Villavicencio usa el FC del Excel y Yopal queda sin FC. Súbelo una vez al mes.'}</span></div>`}
     if(!f&&k==='cli')return `<div class="fitem ${CLI_GUARDADO?'ok':''}"><span>${CLI_GUARDADO?'✓':'–'}</span><b>${TIPOS[k]} (ocasional)</b><span>${CLI_GUARDADO?`Usando el guardado: ${f0.format(Object.keys(CLI_GUARDADO.map).length)} clientes (cargado ${esc(CLI_GUARDADO.cargado||'')}).`:'No hay maestro guardado: los clientes se verán solo con su código.'}</span></div>`;
     if(!f)return `<div class="fitem ${need?'err':''}"><span>${need?'✗':'–'}</span><b>${TIPOS[k]}</b><span>${need?'Falta (obligatorio)':'No cargado (opcional)'}</span></div>`;
-    return `<div class="fitem ${f.warn?'warn':'ok'}"><span>${f.warn?'!':'✓'}</span><b>${TIPOS[k]}</b><span>${esc(f.name)} — ${esc(f.info)}${k==='cli'?(f.guardado?' <b style="color:var(--grn)">Guardado.</b>':' <button class="pri" id="bSaveCli" style="margin-left:6px;padding:3px 10px">Guardar clientes ahora</button>'):''}</span></div>`}).join('')+
+    return `<div class="fitem ${f.warn?'warn':'ok'}"><span>${f.warn?'!':'✓'}</span><b>${TIPOS[k]}</b><span>${esc(f.name)} — ${esc(f.info)}${k==='cli'?(f.guardado?' <b style="color:var(--grn)">Guardado.</b>':' <button class="pri" id="bSaveCli" style="margin-left:6px;padding:3px 10px">Guardar clientes ahora</button>'):''}${k==='fc'?(f.guardado?' <b style="color:var(--grn)">Guardado: reemplazó al anterior.</b>':' <button class="pri" id="bSaveFc" style="margin-left:6px;padding:3px 10px">Guardar pronóstico ahora</button>'):''}</span></div>`}).join('')+
     extras.map(x=>`<div class="fitem err"><span>✗</span><b>${esc(x.name)}</b><span>${esc(x.info)}</span></div>`).join('');
 }
 async function addFiles(list){
@@ -947,6 +947,14 @@ async function addFiles(list){
   }
   renderFiles();await preview();
 }
+document.addEventListener('click',async e=>{if(e.target.id!=='bSaveFc')return;
+  if(!FB){msg('Falta configurar Firebase.',true);return}if(!USER||!puedeEditar()){msg('Entra con tu correo y contraseña para guardar el pronóstico.',true);return}
+  e.target.disabled=true;e.target.textContent='Guardando…';
+  try{const now=new Date(),pad=x=>String(x).padStart(2,'0'),cargado=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`,bt=writeBatch(FB),hechos=[];
+    for(const c of CODS){const d=files.fc.data.fc[c];if(!d)continue;bt.set(doc(FB,CENTROS[c].col,'fc'),{mes:files.fc.data.mes||null,cargado,data:JSON.stringify(d)});FC_GUARDADO[c]={mes:files.fc.data.mes,cargado,fc:d};hechos.push(nomC(c))}
+    await bt.commit();files.fc.guardado=true;renderFiles();
+    msg('Pronóstico guardado para '+hechos.join(' y ')+'. Reemplazó al anterior. Publica para que la página use el nuevo FC y ABC.')}
+  catch(err){e.target.disabled=false;e.target.textContent='Guardar pronóstico ahora';msg('No se pudo guardar el pronóstico ('+(err.code||err.message)+')',true)}});
 document.addEventListener('click',async e=>{if(e.target.id!=='bSaveCli')return;
   if(!FB){msg('Falta configurar Firebase.',true);return}if(!USER||!puedeEditar()){msg('Entra con tu correo y contraseña para guardar el maestro de clientes.',true);return}
   e.target.disabled=true;e.target.textContent='Guardando…';
@@ -1039,6 +1047,7 @@ $('bPub').onclick=async()=>{
   if(files.cli&&ok.length&&!files.cli.guardado){try{await guardarClientes()}catch(e){bad.push('maestro de clientes ('+(e.code||e.message)+')')}}
   curVersion=null;for(const k in TSO_CACHE)delete TSO_CACHE[k];
   for(const c of Object.keys(pending)){if(files.sl1&&files.sl1.data.sol&&files.sl1.data.sol[c])SL_GUARDADO.sl1[c]={cargado:pending[c].generado,data:files.sl1.data.sol[c]};if(files.sl2&&files.sl2.data.canal&&files.sl2.data.canal[c])SL_GUARDADO.sl2[c]={cargado:pending[c].generado,data:files.sl2.data.canal[c]}}
+  if(files.fc&&ok.length)files.fc.guardado=true;
   if(files.fc)for(const c of Object.keys(pending))if(files.fc.data.fc[c])FC_GUARDADO[c]={mes:files.fc.data.mes,cargado:pending[c].generado,fc:files.fc.data.fc[c]};
   if(bad.length){msg((ok.length?'Publicado: '+ok.join(' y ')+'. ':'')+'No se pudo publicar: '+bad.join('; '),true);$('bPub').disabled=false}
   else{msg('Publicado: '+ok.join(' y ')+'. Todos ven ahora esta versión. '+tsoMsg.join(' · ')+'.');toast('Publicado para todos');$('stale').innerHTML=''}
