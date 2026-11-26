@@ -289,6 +289,7 @@ nav.tabs button.on svg{color:#ff5a68}
   <button data-v="d1"><svg viewBox="0 0 24 24"><path d="M3 7h11v9H3z"/><path d="M14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg><span>Cobertura D+1</span></button>
   <button data-v="d3"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M8 15h2M12 15h2M16 15h1"/></svg><span>Cobertura D+3</span></button>
   <button data-v="canal"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Entregado por canal</span></button>
+  <button data-v="t1"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="12" height="9" rx="1"/><path d="M14 10h4l3 3v3h-7"/><circle cx="6" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></svg><span>Tránsitos T1</span></button>
   <button data-v="tso"><svg viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/></svg><span>TSO · Stock out</span></button>
   <button data-v="rot"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg><span>Rotación por SKU</span></button>
   <button data-v="sku"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Detalle por SKU</span></button>
@@ -307,7 +308,7 @@ nav.tabs button.on svg{color:#ff5a68}
     <button class="pri" id="bLogin">Entrar</button>
   </div>
   <div class="drops">
-    <label class="drop" id="dAll" style="grid-column:1/-1;padding:18px;text-align:center"><b>Arrastra aquí los archivos del día (o haz clic para elegirlos)</b><small>ZEXI de SAP, TMS Shipment Plan (.xlsb), Preventa / surtido (.csv), SL base 1 y base 2, una vez al mes el pronóstico (FC y ABC) y, cuando lo actualices, el maestro de clientes. Pueden venir con los dos CD; súbelos todos juntos o uno por uno: el cargador reconoce cada archivo.</small><input type="file" id="fAll" multiple accept=".xlsx,.xls,.xlsm,.xlsb,.csv,.txt,.XLS"></label>
+    <label class="drop" id="dAll" style="grid-column:1/-1;padding:18px;text-align:center"><b>Arrastra aquí los archivos del día (o haz clic para elegirlos)</b><small>ZEXI de SAP, TMS Shipment Plan (.xlsb), Tránsitos T1 de SAP (.XLS), Preventa / surtido (.csv), SL base 1 y base 2, una vez al mes el pronóstico (FC y ABC) y, cuando lo actualices, el maestro de clientes. Pueden venir con los dos CD; súbelos todos juntos o uno por uno: el cargador reconoce cada archivo.</small><input type="file" id="fAll" multiple accept=".xlsx,.xls,.xlsm,.xlsb,.csv,.txt,.XLS"></label>
   </div>
   <div id="flist" class="flist"></div>
   <div id="cenTbl"></div>
@@ -339,8 +340,8 @@ nav.tabs button.on svg{color:#ff5a68}
 <div id="toast"></div>
 <div id="tip"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="centros.js?v=20261119b"></script>
-<script src="engine.js?v=20261119b"></script>
+<script src="centros.js?v=20261125t"></script>
+<script src="engine.js?v=20261125t"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -379,6 +380,7 @@ let CLIENTES=null;
 async function loadChunks(meta){
   const parts=await Promise.all(Array.from({length:meta.chunks},(_,i)=>getDoc(doc(FB,COL,'c'+i))));
   const all=[];for(const p of parts){const b=p.exists()?p.data():null;if(!b||b.version!==meta.version)return false;all.push(...JSON.parse(b.rows))}
+  await cargarT1();
   CLIENTES=null;
   if(meta.kchunks){try{const ks=await Promise.all(Array.from({length:meta.kchunks},(_,i)=>getDoc(doc(FB,COL,'k'+i))));CLIENTES={};for(const k of ks){const b=k.exists()?k.data():null;if(b&&b.version===meta.version)Object.assign(CLIENTES,JSON.parse(b.data))}}catch(e){CLIENTES=null}}
   setData({columns:meta.columns,rows:all,d1day:meta.d1day||null,dias:meta.dias||null,dia:meta.dia||null,capacidad:meta.capacidad||null,semana:meta.semana,centro:meta.centro,generado:meta.generado},meta.por?'por '+meta.por:'');
@@ -457,10 +459,10 @@ function renderData(){
 
 /* ---------- Vistas ---------- */
 let VIEW='inicio',copyData={h:[],r:[]};
-try{const h=location.hash.slice(1);if(['inicio','ocu','d1','d3','canal','tso','rot','sku','data'].includes(h))VIEW=h}catch(e){}
+try{const h=location.hash.slice(1);if(['inicio','ocu','d1','d3','canal','t1','tso','rot','sku','data'].includes(h))VIEW=h}catch(e){}
 // Enlace de una sola vista: index.html?centro=AV19&vista=canal (oculta las demás pestañas)
-let SOLO=null;try{const v=(new URLSearchParams(location.search).get('vista')||'').toLowerCase();if(['inicio','ocu','d1','d3','canal','tso','rot','sku','data'].includes(v)&&document.body.dataset.modo!=='cargar'){SOLO=v;VIEW=v}}catch(e){}
-if(SOLO){document.getElementById('tabs').style.display='none';const t={inicio:'Resumen del día',ocu:'Ocupación bodega',d1:'Cobertura D+1',d3:'Cobertura D+3',canal:'Volumen entregado por canal',tso:'TSO',rot:'Rotación por SKU',sku:'Detalle por SKU',data:'Tabla completa'}[SOLO];
+let SOLO=null;try{const v=(new URLSearchParams(location.search).get('vista')||'').toLowerCase();if(['inicio','ocu','d1','d3','canal','t1','tso','rot','sku','data'].includes(v)&&document.body.dataset.modo!=='cargar'){SOLO=v;VIEW=v}}catch(e){}
+if(SOLO){document.getElementById('tabs').style.display='none';const t={inicio:'Resumen del día',ocu:'Ocupación bodega',d1:'Cobertura D+1',d3:'Cobertura D+3',canal:'Volumen entregado por canal',t1:'Tránsitos T1',tso:'TSO',rot:'Rotación por SKU',sku:'Detalle por SKU',data:'Tabla completa'}[SOLO];
   setTimeout(()=>{try{$('h1').textContent=CEN.nombre+' · '+CENTRO;document.title=t+' · '+CEN.nombre;$('cen').querySelectorAll('a').forEach(a=>{a.href=a.href.split('?')[0]+'?centro='+a.href.split('centro=')[1].split('&')[0].split('#')[0]+'&vista='+SOLO})}catch(e){}},0)}
 const N=v=>+v||0, dv=(a,b)=>b?a/b:0;
 const f0=new Intl.NumberFormat('es-CO',{maximumFractionDigits:0}),f1=new Intl.NumberFormat('es-CO',{minimumFractionDigits:1,maximumFractionDigits:1});
@@ -860,16 +862,49 @@ async function renderInicio(){
   set('k_ocu','ocu',pp,'down','#2a78d6',0.0005);set('k_piso','piso',x=>f0.format(x)+' HL','up','#2a78d6',0.5);set('k_dc','dc',x=>f1.format(x)+' días','up','#2a78d6',0.05);
   set('k_tso','tso',pp,'down','#d50f25',0.0005);set('k_cump','cump',pp,'up','#1baf7a',0.0005);
 }
+
+/* ---------- Tránsitos T1 (tractomulas en camino) ---------- */
+let T1=null; // {cargado, data:[[mat,fecha,unidades,hl,origen,placa,entrega]]}
+async function cargarT1(){T1=null;if(!FB)return;try{const d=await getDoc(doc(FB,COL,'t1'));if(d.exists()){const b=d.data();T1={cargado:b.cargado,data:JSON.parse(b.data)}}}catch(e){}}
+function renderT1(){
+  $('kpis').innerHTML='';
+  if(!T1||!T1.data||!T1.data.length){$('charts').innerHTML='<div class="card full empty" style="grid-column:1/-1">No hay tránsitos T1 cargados para este centro. Súbelos desde el cargador con el listado de tránsitos intercompañías de SAP.</div>';$('foot').textContent='';return}
+  const S=skusFiltrados();
+  const L=T1.data.filter(x=>S.has(String(x[0]))).map(x=>{const r=S.get(String(x[0]));return {m:String(x[0]),d:r.Descripcion,f:x[1],u:x[2],hl:x[3],o:x[4],pl:x[5],e:x[6],cj:N(r.presentacio)?x[2]/N(r.presentacio):null,um:r.UM||'',fc:N(r['FC Dia']),piso:N(r['Inv. Piso'])}});
+  const tot=L.reduce((a,x)=>a+x.hl,0),placas=new Set(L.map(x=>x.pl)),zx=rows.filter(r=>S.has(String(r.Material))).reduce((a,r)=>a+N(r['Inv. Transito']),0);
+  const fds=[...new Set(L.map(x=>x.f))].sort(),porF=fds.map(f=>({f,hl:L.filter(x=>x.f===f).reduce((a,x)=>a+x.hl,0),n:new Set(L.filter(x=>x.f===f).map(x=>x.pl)).size}));
+  const camion={};L.forEach(x=>{const c=camion[x.pl]||(camion[x.pl]={pl:x.pl,f:x.f,o:x.o,hl:0,sk:new Set(),it:[]});c.hl+=x.hl;c.sk.add(x.m);c.it.push(x);if(x.f<c.f)c.f=x.f});
+  const cams=Object.values(camion).sort((a,b)=>a.f.localeCompare(b.f)||b.hl-a.hl);
+  const bySku={};L.forEach(x=>{const o=bySku[x.m]||(bySku[x.m]={m:x.m,d:x.d,hl:0,cj:0,um:x.um,fc:x.fc,piso:x.piso,pl:new Set()});o.hl+=x.hl;if(x.cj!=null)o.cj+=x.cj;o.pl.add(x.pl)});
+  const skus=Object.values(bySku).sort((a,b)=>b.hl-a.hl);
+  const fF=f=>f?f.slice(8,10)+'/'+f.slice(5,7):'—';
+  const mxF=Math.max(1,...porF.map(x=>x.hl));
+  $('kpis').innerHTML=[
+    ['HL en tránsito T1',f0.format(tot)+' HL','',`${L.length} entregas · ${skus.length} SKUs`],
+    ['Tractomulas',placas.size,'',`${f1.format(dv(tot,placas.size))} HL promedio por camión`],
+    ['Días de cobertura que traen',f1.format(dv(tot,rows.filter(r=>S.has(String(r.Material))).reduce((a,r)=>a+N(r['FC Dia']),0))),'','HL en camino ÷ FC día del CD'],
+    ['Tránsito en ZEXI (alm. '+PRE+'40)',f0.format(zx)+' HL',Math.abs(zx-tot)>Math.max(50,tot*0.1)?'a':'',Math.abs(zx-tot)<1?'cuadra con el listado':`diferencia de ${f0.format(Math.abs(zx-tot))} HL con el listado`]
+  ].map(([l,v,c,s])=>`<div class="kpi ${c}"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join('');
+  $('charts').innerHTML=`<div class="card viz"><h4>HL despachados por fecha de salida</h4><div class="cs">Fecha de salida de mercancía en la planta (S.M.).</div>
+     <div class="hb">${porF.map(x=>`<div class="lab" style="cursor:default">${fF(x.f)}</div><div class="trk" style="width:${x.hl/mxF*100}%"><span style="flex:1;background:var(--ka)" data-tip="Salida ${fF(x.f)}<br>${f0.format(x.hl)} HL en ${x.n} camiones"></span></div><div class="val">${f0.format(x.hl)} HL · ${x.n} camiones</div>`).join('')}</div></div>
+   <div class="card viz"><h4>SKUs que vienen en camino</h4><div class="cs">HL y unidades de venta por SKU, y cuántos días de su FC cubren.</div><div class="tscroll"><table class="tt"><thead><tr><th class="t">SKU</th><th class="t">Descripción</th><th>Unid. venta</th><th>HL</th><th>Días FC</th><th>Camiones</th></tr></thead><tbody>
+     ${skus.map(x=>`<tr data-sku="${esc(x.m)}"><td class="t">${esc(x.m)}</td><td class="t" title="${esc(x.d)}">${esc(x.d)}</td><td>${x.cj?f0.format(x.cj)+' '+esc(x.um):'—'}</td><td>${f0.format(x.hl)}</td><td>${x.fc?f1.format(x.hl/x.fc):'—'}</td><td>${x.pl.size}</td></tr>`).join('')}</tbody></table></div></div>
+   <div class="card full"><div class="ch">TRACTOMULAS EN TRÁNSITO</div><div class="tscroll" style="max-height:520px"><table class="tt"><thead><tr><th class="t">Placa</th><th class="t">Salida</th><th class="t">Origen</th><th>HL</th><th>SKUs</th><th class="t">Contenido</th></tr></thead><tbody>
+     ${cams.map(c=>`<tr><td class="t"><b>${esc(c.pl)}</b></td><td class="t">${fF(c.f)}</td><td class="t">${esc(c.o)}</td><td>${f0.format(c.hl)}</td><td>${c.sk.size}</td><td class="t" style="white-space:normal;max-width:none">${c.it.map(x=>`<span class="chip" data-sku="${esc(x.m)}" style="cursor:pointer">${esc(x.d)} · ${x.cj?f0.format(x.cj)+' '+esc(x.um):f0.format(x.u)+' und'}</span>`).join(' ')}</td></tr>`).join('')}
+     <tr class="tot"><td class="t">Total</td><td></td><td></td><td>${f0.format(tot)}</td><td>${skus.length}</td><td></td></tr></tbody></table></div></div>`;
+  copyData={h:['Placa','Salida','Origen','SKU','Descripción','Unidades','HL'],r:L.map(x=>[x.pl,x.f,x.o,x.m,x.d,x.u,Math.round(x.hl*10)/10])};
+  $('foot').textContent=`Listado de tránsitos intercompañías de SAP cargado ${T1.cargado||''}. HL = unidades × contenido (cc) ÷ 100.000. Clic en un SKU para ver su ficha.`;
+}
 function layout(){
   const sku=VIEW==='sku';
   document.querySelector('.bar').style.display=(sku||VIEW==='inicio')?'none':'';
-  document.querySelector('.wrap').style.display=(sku||VIEW==='ocu'||VIEW==='tso'||VIEW==='inicio')?'none':'';
+  document.querySelector('.wrap').style.display=(sku||VIEW==='ocu'||VIEW==='tso'||VIEW==='inicio'||VIEW==='t1')?'none':'';
   $('bCols').style.display=VIEW==='data'?'':'none';
   $('ficha').style.display=sku?'block':'none';
-  if(VIEW!=='rot'&&VIEW!=='ocu'&&VIEW!=='tso'&&VIEW!=='inicio')$('charts').innerHTML='';
+  if(VIEW!=='rot'&&VIEW!=='ocu'&&VIEW!=='tso'&&VIEW!=='inicio'&&VIEW!=='t1')$('charts').innerHTML='';
 }
-const VIEWINFO={"inicio":["Resumen del día","Lo más importante del CD en un vistazo: ocupación, riesgos, inventario quieto y llegadas."],"ocu": ["Ocupación de bodega", "Cuánto espacio ocupa el producto terminado frente a la capacidad del CD."], "d1": ["Cobertura D+1", "Días de inventario en bodega y tránsitos, descontando la preventa de mañana."], "d3": ["Cobertura D+3", "Cobertura en bloques de tres días frente a la preventa de la semana."], "canal": ["Volumen entregado por canal", "Entregas del mes por KA, TAT y Socios frente al forecast acumulado."], "tso": ["TSO · Stock out teórico", "Hectolitros que faltan en piso para cubrir el forecast del día."], "rot": ["Rotación por SKU", "Qué producto se mueve, cuánto y qué se está quedando quieto en bodega."], "sku": ["Detalle por SKU", "La ficha completa de un producto: inventario, balance, canales y clientes."], "data": ["Tabla completa", "Todas las columnas de la pestaña Data, con filtros y orden."]};
-function render(){ if(!D)return; try{const vi=VIEWINFO[VIEW]||['',''];$('vt').textContent=vi[0];$('vd').textContent=vi[1];const m=$('mainEl');m.classList.remove('anim');void m.offsetWidth;m.classList.add('anim')}catch(e){} layout(); VIEW==='data'?renderData():VIEW==='sku'?renderSku():VIEW==='inicio'?renderInicio():VIEW==='ocu'?renderOcu():VIEW==='tso'?renderTSO():renderView(); }
+const VIEWINFO={"t1":["Tránsitos T1","Producto que viene en tractomulas desde las plantas, convertido a HL."],"inicio":["Resumen del día","Lo más importante del CD en un vistazo: ocupación, riesgos, inventario quieto y llegadas."],"ocu": ["Ocupación de bodega", "Cuánto espacio ocupa el producto terminado frente a la capacidad del CD."], "d1": ["Cobertura D+1", "Días de inventario en bodega y tránsitos, descontando la preventa de mañana."], "d3": ["Cobertura D+3", "Cobertura en bloques de tres días frente a la preventa de la semana."], "canal": ["Volumen entregado por canal", "Entregas del mes por KA, TAT y Socios frente al forecast acumulado."], "tso": ["TSO · Stock out teórico", "Hectolitros que faltan en piso para cubrir el forecast del día."], "rot": ["Rotación por SKU", "Qué producto se mueve, cuánto y qué se está quedando quieto en bodega."], "sku": ["Detalle por SKU", "La ficha completa de un producto: inventario, balance, canales y clientes."], "data": ["Tabla completa", "Todas las columnas de la pestaña Data, con filtros y orden."]};
+function render(){ if(!D)return; try{const vi=VIEWINFO[VIEW]||['',''];$('vt').textContent=vi[0];$('vd').textContent=vi[1];const m=$('mainEl');m.classList.remove('anim');void m.offsetWidth;m.classList.add('anim')}catch(e){} layout(); VIEW==='data'?renderData():VIEW==='sku'?renderSku():VIEW==='t1'?renderT1():VIEW==='inicio'?renderInicio():VIEW==='ocu'?renderOcu():VIEW==='tso'?renderTSO():renderView(); }
 document.querySelectorAll('#tabs button').forEach(b=>{b.classList.toggle('on',b.dataset.v===VIEW);b.onclick=()=>{VIEW=b.dataset.v;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));try{history.replaceState(null,'','#'+VIEW)}catch(e){};render()}});
 ['q','fMarca','fLines','fTipo','fEstado','fMov'].forEach(id=>$(id).addEventListener('input',render));
 $('bCols').onclick=()=>{const c=$('cols');c.style.display=c.style.display==='block'?'none':'block'};
@@ -905,7 +940,7 @@ async function readFileRows(file){
   const wb=XLSX.read(buf,{type:'array',cellDates:true,dense:true,...(want.length?{sheets:want}:{})});
   return wb.SheetNames.filter(n=>wb.Sheets[n]).map(n=>({name:n,rows:XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,raw:true,defval:null})}));
 }
-const TIPOS={zexi:'ZEXI · inventario',tms:'TMS',prev:'Preventa',sl1:'SL base 1 · solicitado',sl2:'SL base 2 · entregado por canal',fc:'Pronóstico del mes · FC y ABC',cli:'Maestro de clientes · nombres'};
+const TIPOS={zexi:'ZEXI · inventario',tms:'TMS',prev:'Preventa',sl1:'SL base 1 · solicitado',sl2:'SL base 2 · entregado por canal',fc:'Pronóstico del mes · FC y ABC',cli:'Maestro de clientes · nombres',t1:'Tránsitos T1 · tractomulas'};
 const CODS=Object.keys(CENTROS);
 const nomC=c=>(CENTROS[c]&&CENTROS[c].nombre)||c;
 const extras=[];
@@ -915,14 +950,16 @@ function parseTipo(k,rows){
   if(k==='prev'){const d=Engine.parsePreventa(rows,new Date());if(d['*'])return {data:d,info:'formato del Excel (un solo centro: '+nomC(CENTRO)+')'};
     return {data:d,info:Object.entries(d).filter(([c])=>CENTROS[c]).map(([c,p])=>`${nomC(c)}: D+1 = día ${p.d1day}, D+3 = días ${p.dias[0]} a ${p.dias[p.dias.length-1]}, ${Object.keys(p.clientes).length} SKUs`).join(' · ')}}
   if(k==='fc'){const d=Engine.parseFC(rows);return {data:d,info:`mes ${d.mes||'?'}, semanas ${d.semanas.join(', ')} · `+Object.keys(d.fc).filter(c=>CENTROS[c]).map(c=>{const v=Object.values(d.fc[c]);return `${nomC(c)}: ${f0.format(v.reduce((a,x)=>a+x.fc,0))} HL, A=${v.filter(x=>x.abc==='A').length} B=${v.filter(x=>x.abc==='B').length} C=${v.filter(x=>x.abc==='C').length}`}).join(' · ')+'. Al guardarlo o publicar reemplaza al anterior; puedes cambiarlo las veces que quieras.'}}
+  if(k==='t1'){const d=Engine.parseTransitos(rows),by={},pl={};d.forEach(x=>{by[x.ce]=(by[x.ce]||0)+1;(pl[x.ce]||(pl[x.ce]=new Set())).add(x.placa)});const cs=Object.keys(by).filter(c=>CENTROS[c]);if(!cs.length)throw new Error('no trae tránsitos para los centros configurados');return {data:d,info:cs.map(c=>`${nomC(c)}: ${by[c]} entregas en ${pl[c].size} tractomulas`).join(' · ')+'. Queda guardado al publicar.'}}
   if(k==='cli'){const d=Engine.parseClientes(rows),n=Object.keys(d).length;if(!n)throw new Error('no trae clientes');return {data:d,info:`${f0.format(n)} clientes con nombre. Se guarda al publicar y se usa en adelante; súbelo de nuevo solo cuando lo actualices.`}}
   if(k==='sl1'){const d=Engine.parseSL(rows);return {data:d,info:Object.keys(d.sol).filter(c=>CENTROS[c]).map(c=>`${nomC(c)}: ${Object.keys(d.sol[c]).length} SKUs`).join(' · ')}}
   if(k==='sl2'){const d=Engine.parseSL(rows);if(d.combinado)return {data:d,warn:true,info:'trae los dos CD sumados (no tiene la columna Codigo Centro). No la uso: las entregas por canal quedan con los valores anteriores. Descárgala con Codigo Centro en las filas, o una por cada CD.'};
     return {data:d,info:Object.keys(d.canal).filter(c=>CENTROS[c]).map(c=>`${nomC(c)}: ${Object.keys(d.canal[c]).length} SKUs`).join(' · ')}}
 }
 function renderFiles(){
-  const order=['zexi','tms','prev','sl1','sl2','fc','cli'];
+  const order=['zexi','tms','t1','prev','sl1','sl2','fc','cli'];
   $('flist').innerHTML=order.map(k=>{const f=files[k];const need=k==='zexi'||k==='prev';
+    if(!f&&k==='t1')return `<div class="fitem"><span>–</span><b>${TIPOS[k]}</b><span>No cargado: la pestaña Tránsitos T1 sigue mostrando la última carga.</span></div>`;
     if(!f&&(k==='sl1'||k==='sl2')){const g=Object.entries(SL_GUARDADO[k]).filter(([c])=>CENTROS[c]);
       return `<div class="fitem ${g.length?'ok':''}"><span>${g.length?'✓':'–'}</span><b>${TIPOS[k]}</b><span>${g.length?'Usando el guardado: '+g.map(([c,x])=>`${nomC(c)} (cargado ${esc(x.cargado||'')})`).join(' · ')+'. Súbelo de nuevo cuando quieras actualizarlo.':'No cargado (opcional)'}</span></div>`}
     if(!f&&k==='fc'){const g=Object.entries(FC_GUARDADO).filter(([c])=>CENTROS[c]);
@@ -934,7 +971,7 @@ function renderFiles(){
 }
 async function addFiles(list){
   if(typeof XLSX==='undefined'||typeof Engine==='undefined'){msg('No cargó el lector de Excel; recarga la página',true);return}
-  if(Engine.VERSION!=='20261119b'){msg('Tu navegador está usando una versión vieja del motor de cálculo. Recarga la página con Ctrl+F5 y vuelve a subir los archivos.',true);return}
+  if(Engine.VERSION!=='20261125t'){msg('Tu navegador está usando una versión vieja del motor de cálculo. Recarga la página con Ctrl+F5 y vuelve a subir los archivos.',true);return}
   extras.length=0;
   for(const f of list){
     msg('Leyendo '+f.name+'…');
@@ -992,10 +1029,12 @@ async function preview(){
     const fc=files.fc?(files.fc.data.fc[c]||null):(FC_GUARDADO[c]?FC_GUARDADO[c].fc:null);
     const r=Engine.compute(MASTER,files.zexi.data,files.tms?files.tms.data:[],prev,today,c,{sl,canal,fc});
     r.generado=gen;const inp=document.querySelector(`#cenTbl input[data-cap="${c}"]`);r.capacidad=N(inp&&inp.value)||CENTROS[c].cap||null;
+    if(files.t1){const MM={};MASTER.forEach(m=>MM[String(m.Material)]=m);r.t1=files.t1.data.filter(x=>x.ce===c).map(x=>{const m=MM[x.mat],q=m?(+m.conte||0):0;return [x.mat,x.fecha,x.cant,Math.round(x.cant*q/1e3)/100,x.origen,x.placa,x.entrega]})}
     out[c]=r;
   }
   pending=Object.keys(out).length?out:null;renderCen();
   if(!pending){$('bPub').disabled=true;msg('El ZEXI no trae inventario de ningún centro configurado.',true);return}
+  if(pending[CENTRO]&&pending[CENTRO].t1)T1={cargado:'vista previa',data:pending[CENTRO].t1};
   if(pending[CENTRO]){CLIENTES=conNombres(pending[CENTRO].clientes)||null;setData(pending[CENTRO],'vista previa sin publicar');$('stale').innerHTML='<span class="badge">Vista previa</span>'}
   msg(`Listo para publicar: ${Object.keys(pending).map(nomC).join(' y ')}. Estás viendo ${nomC(CENTRO)}; revisa y publica.`+(solo?' (Preventa en formato del Excel: solo se publica este centro.)':''));
   $('bPub').disabled=!(FB&&puedeEditar());
@@ -1039,6 +1078,7 @@ $('bPub').onclick=async()=>{
        else tsoMsg.push(`${nomC(c)}: la foto TSO de hoy ya estaba (${ya.hora||'primera publicación'}), no se cambió`);}
       if(files.sl1&&files.sl1.data.sol&&files.sl1.data.sol[c])batch.set(doc(FB,col,'sl1'),{cargado:P.generado,data:JSON.stringify(files.sl1.data.sol[c])});
       if(files.sl2&&files.sl2.data.canal&&files.sl2.data.canal[c])batch.set(doc(FB,col,'sl2'),{cargado:P.generado,data:JSON.stringify(files.sl2.data.canal[c])});
+      if(P.t1)batch.set(doc(FB,col,'t1'),{cargado:P.generado,data:JSON.stringify(P.t1)});
       if(files.fc&&files.fc.data.fc[c])batch.set(doc(FB,col,'fc'),{mes:files.fc.data.mes||null,cargado:P.generado,data:JSON.stringify(files.fc.data.fc[c])});
       batch.set(doc(FB,col,'meta'),{version,chunks:n,kchunks:kc.length,d1day:P.d1day||null,dias:P.dias||null,dia:P.dia||null,capacidad:P.capacidad||null,columns:P.columns,semana:P.semana,centro:c,generado:P.generado,por:USER.displayName||USER.email,stats:P.stats});
       await batch.commit();ok.push(nomC(c));

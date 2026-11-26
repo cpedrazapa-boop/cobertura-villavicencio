@@ -230,8 +230,29 @@
     return out;
   }
 
+  /* ---------- Tránsitos intercompañías T1 (SAP, en unidades) ---------- */
+  function parseTransitos(rows) {
+    const out = [];
+    for (const r0 of rows) {
+      if (!r0) continue; const r = r0.map(v => v == null ? '' : String(v).trim());
+      if (!/^\d+$/.test(r[0])) continue;
+      const iC = r.findIndex((v, j) => j > 12 && /^AV\d+$/i.test(v)); if (iC < 0) continue;
+      const fecha = r.find(v => /^\d{2}\.\d{2}\.\d{4}$/.test(v)) || '';
+      const iQ = r.findIndex((v, j) => j > 10 && j < iC && /^-?[\d.]+,\d+$/.test(v));
+      const iU = r.findIndex((v, j) => j > iQ && /^[A-Z]{2,3}$/.test(v) && j < iC);
+      const origen = r.filter((v, j) => j > 11 && j < iQ && /^[A-Z]{2}\d{2}$/.test(v)).pop() || '';
+      out.push({ mat: key(r[0]), desc: r[2] || '', entrega: r[6] || '', fecha: fecha ? fecha.split('.').reverse().join('-') : '',
+        cant: iQ >= 0 ? num(r[iQ]) : 0, umb: iU >= 0 ? r[iU] : 'UN',
+        ce: r[iC].toUpperCase(), alm: r[iC + 1] || '', placa: r[iC + 2] || '', origen });
+    }
+    if (!out.length) throw new Error('Tránsitos: no encontré filas con material y centro');
+    return out;
+  }
+
   /* ---------- Reconocer qué archivo es ---------- */
   function classify(rows) {
+    for (let i = 0; i < Math.min(rows.length, 12); i++) if ((rows[i] || []).some(v => /listado de transitos/i.test(norm(v)))) return 't1';
+    if (findHeader(rows, ['material', 'no entrega']) >= 0 && findHeader(rows, ['placa']) >= 0) return 't1';
     if (findHeader(rows, ['material', 'alm']) >= 0) return 'zexi';
     if (findHeader(rows, ['cd', 'sku_demanda']) >= 0) return 'fc';
     if (findHeader(rows, ['shipment destination location id', 'sku', 'hl']) >= 0 || findHeader(rows, ['llave', 'hl']) >= 0) return 'tms';
@@ -334,6 +355,6 @@
     return { name: n, rows: XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: true, defval: null }) };
   }
 
-  const api = { VERSION: '20261119b', COLUMNS, parseZexi, parseTms, parsePreventa, parseSL, parseFC, parseClientes, abcDe, classify, compute, pickSheet, weeknum, norm, num, key };
+  const api = { VERSION: '20261125t', COLUMNS, parseZexi, parseTms, parsePreventa, parseSL, parseFC, parseClientes, parseTransitos, abcDe, classify, compute, pickSheet, weeknum, norm, num, key };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.Engine = api;
 })(typeof self !== 'undefined' ? self : this);
